@@ -1,2 +1,2 @@
 # redpic
-RElativistic Difference scheme Particles-In-Cell
+Relativistic Difference Scheme Particles-In-Cell
