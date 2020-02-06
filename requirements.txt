@@ -1,0 +1,11 @@
+redpic
+kenv
+numpy
+scipy
+pandas
+deap
+matplotlib
+bokeh
+holoviews
+PyQt5
+
