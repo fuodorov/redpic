@@ -48,14 +48,14 @@ m_p = proton_mass = constants.m_p
 m_n = neutron_mass = constants.m_n
 u = m_u = atomic_constant_mass = constants.physical_constants[ 'atomic mass constant' ][0]
 
-particle = namedtuple('particle', [ 'symbol', 'mass', 'charge' ])
+particle = namedtuple('particle', [ 'name', 'symbol', 'mass', 'charge' ])
 
-electron = particle(symbol='e', mass=electron_mass, charge=-elementary_charge)
-positron = particle(symbol='e+', mass=electron_mass, charge=elementary_charge)
-proton = particle(symbol='p', mass=proton_mass, charge=elementary_charge)
-anti_proton = particle(symbol='p-', mass=proton_mass, charge=-elementary_charge)
-neutron = particle(symbol='n', mass=neutron_mass, charge=0)
-anti_neutron = particle(symbol='n', mass=neutron_mass, charge=0)
+electron = particle(name='electron', symbol='e', mass=m_e, charge=-e)
+positron = particle(name='positron', symbol='e+', mass=m_e, charge=e)
+proton = particle(name='proton', symbol='p', mass=m_p, charge=e)
+anti_proton = particle(name='anti proton', symbol='p-', mass=m_p, charge=-e)
+neutron = particle(name='neutron', symbol='n', mass=m_n, charge=0)
+anti_neutron = particle(name='anti neutron', symbol='n', mass=m_n, charge=0)
 
 # Get mass of each element from periodictable
 elements = periodictable.core.default_table()
