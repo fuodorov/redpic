@@ -2,6 +2,7 @@ redpic
 kenv
 numpy
 scipy
+periodictable
 pandas
 deap
 matplotlib
