@@ -6,6 +6,7 @@ Particle-in-Cell code (REDPIC) solver file.
 
 import numpy as np
 import pandas as pd
+from scipy import misc
 from .constants import *
 from .beam import *
 
@@ -43,33 +44,86 @@ def red(Y,t=0):
     return np.array([vx, vy, vz, Fx, Fy, Fz])
 
 class Simulation:
-    def __init__(self, beam):
+    ''' Simulation of the envelope beam in the accelerator
+
+    '''
+    def __init__(self, beam, accelerator):
         self.beam = beam
-        self.beam_track = {}
+        self.acc = accelerator
 
     def track(self):
-        Y = self.beam.data
+        m = self.beam.type.mass
+        q = self.beam.type.charge
+        dz = self.acc.dz
+        dt = dz/c
+        t_max = (self.acc.z_stop-self.acc.z_start)/c
+        Y = self.beam.da
 
-        cdt = 0.1 # m
-        dt = cdt/r_0
+        Y[0], Y[1], Y[2] = Y[0]/dz, Y[1]/dz, Y[2]/dz
+        Y[3], Y[4], Y[5] = Y[3]*1e6*e/m/c**2, Y[4]*1e6*e/m/c**2, Y[5]*1e6*e/m/c**2
+        # RED schema
+        for t in np.arange(0, t_max, 2*dt):
 
-        ct_max = 10 # m
-        t_max = ct_max/r_0
+            offset_x = self.acc.Dx(Y[2]*dz)
+            offset_xp = self.acc.Dxp(Y[2]*dz)
+            offset_y = self.acc.Dy(Y[2]*dz)
+            offset_yp = self.acc.Dyp(Y[2]*dz)
+            x_corr = Y[0]*dz - offset_x
+            y_corr = Y[1]*dz - offset_y
+            r_corr = np.sqrt((x_corr)**2 + (y_corr)**2)
 
-        for t in np.arange(0,t_max,dt):
-            F0 = F(Y,t)
+            Ez = self.acc.Ez(Y[2]*dz)*1e6
+            dEzdz = self.acc.dEzdz(Y[2]*dz)*1e6
+            d2Ezdz2 = misc.derivative(self.acc.dEzdz, Y[2]*dz, dx=dz, n=1)*1e6
+            Ez = Ez - d2Ezdz2*r_corr**2/4 - d2Ezdz2*r_corr**2/4            # row remainder
+            Ex = - dEzdz*x_corr/2 - dEzdz*x_corr/2 + Ez*offset_xp          # row remainder
+            Ey = - dEzdz*y_corr/2 - dEzdz*y_corr/2 + Ez*offset_yp          # row remainder
+            Ez = Ez*(e*dt/m/c/30_000)
+            Ex = Ex*(e*dt/m/c/30_000)
+            Ey = Ey*(e*dt/m/c/30_000)
 
-            K1 = F0*dt
-            K2 = F(Y + K1/2, t + dt/2)*dt
-            K3 = F(Y + K2/2, t + dt/2)*dt
-            K4 = F(Y + K3  , t + dt)*dt
+            Y[3], Y[4], Y[5] = Y[3] + 2*Ex, Y[4] + 2*Ey, Y[5] + 2*Ez
+            gamma = np.sqrt(1 + Y[3]*Y[3] + Y[4]*Y[4] + Y[5]*Y[5])
+            vx, vy, vz = Y[3]/gamma, Y[4]/gamma, Y[5]/gamma
+            Y[0], Y[1], Y[2] = Y[0] + vx, Y[1] + vy, Y[2] + vz
 
-            Y  = Y + (K1 + 2*K2 + 2*K3 + K4)/6
+            Bx = self.acc.Bx(Y[2]*dz)
+            By = self.acc.By(Y[2]*dz)
+            Bz = self.acc.Bz(Y[2]*dz)
+            dBzdz = self.acc.dBzdz(Y[2]*dz)
+            d2Bzdz2 = misc.derivative(self.acc.dBzdz, Y[2]*dz, dx=dz, n=1)
+            Gz = self.acc.Gz(Y[2]*dz)
+            Bz = Bz - d2Bzdz2*r_corr**2/4 - d2Bzdz2*r_corr**2/4              # row remainder
+            Bx = Bx + Gz*y_corr - dBzdz*x_corr/2 - dBzdz*x_corr/2 + Bz*offset_xp     # row remainder
+            By = By + Gz*x_corr - dBzdz*y_corr/2 - dBzdz*y_corr/2 + Bz*offset_yp     # row remainder
+            Bz = Bz*(e*dt/m/c*1.2566e-2)
+            Bx = Bx*(e*dt/m/c*1.2566e-2)
+            By = By*(e*dt/m/c*1.2566e-2)
+            Bx, By, Bz = Bx/gamma, By/gamma, Bz/gamma
 
+            b2 = 1 + Bx*Bx + By*By + Bz*Bz
+            b1 = 2 - b2
+            b3 = 2*(vx*Bx + vy*By + vz*Bz)
+            fx = 2*(vy*Bz - vz*By)
+            fy = 2*(vz*Bx - vx*Bz)
+            fz = 2*(vx*By - vy*Bx)
+
+            vx = (vx*b1 + fx + Bx*b3)/b2
+            vy = (vy*b1 + fy + By*b3)/b2
+            vz = (vz*b1 + fz + Bz*b3)/b2
+
+            Y[0], Y[1], Y[2] = Y[0] + vx, Y[1] + vy, Y[2] + vz
+            Y[3], Y[4], Y[5] = vx*gamma, vy*gamma, vz*gamma
             # output:
             df = pd.DataFrame(np.transpose(Y),
                               columns=['x','y','z','px','py','pz'])
-            self.beam_track[t*r_0] = df
-
+            df['x'] = df['x']*dz
+            df['y'] = df['y']*dz
+            df['z'] = df['z']*dz
+            df['px'] = df['px']*m*c**2/e/1e6
+            df['py'] = df['py']*m*c**2/e/1e6
+            df['pz'] = df['pz']*m*c**2/e/1e6
+            #print(df)
+            print( "\rz = %g m " % (self.acc.z_start+t*c), end="")
 
 Sim = Simulation

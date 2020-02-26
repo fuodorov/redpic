@@ -38,8 +38,8 @@ __all__ = [ 'speed_of_light',
             'neutron',
             'antineutron',
             'Element',
-            'Particle',
-            'E_0', 'B_0' ]
+            'Particle'
+            ]
 
 # Constants
 c = speed_of_light = constants.c
@@ -67,11 +67,6 @@ antiproton = Element(name='antiproton', symbol='p-', mass=m_p, charge=-e)
 neutron = Element(name='neutron', symbol='n', mass=m_n, charge=0)
 antineutron = Element(name='antineutron', symbol='n', mass=m_n, charge=0)
 Particle = Element
-
-##########!!!########
-E_0_cgs = 4.803e-10/(r_0*r_0*1e4) # statvolt/cm
-E_0 = E_0_cgs*299.792458*100 # V/m
-B_0 = E_0_cgs/10_000 # Tesla
 
 # Get mass of each element from periodictable
 elements = periodictable.core.default_table()
