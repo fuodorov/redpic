@@ -19,54 +19,67 @@ class Beam:
 
     '''
 
-    def __init__(self, type: Element, *, n: int, macro_charge: float=0.0) -> None:
+    def __init__(self, type: Element) -> None:
+        self.type = type        # particles type
+        self.n = 0.0            # quantity
+        self.da = np.array      # data array
+        self.df = pd.DataFrame  # data frame
 
-        assert n > 0, 'The number of particles (n) must be a positive number!'
-
-        self.type = type
-        self.n = n
-        self.x = np.zeros(int(n))
-        self.y = np.zeros(int(n))
-        self.z = np.zeros(int(n))
-        self.px = np.zeros(int(n))
-        self.py = np.zeros(int(n))
-        self.pz = np.zeros(int(n))
-        self.data = np.zeros((6, int(n)))
-        if macro_charge == 0.0:
-            self.macro_charge = type.charge
-        else:
-            self.macro_charge = macro_charge
-        self.df = pd.DataFrame(np.transpose(self.data), columns=['x','y','z','px','py','pz'])
-
-    def generate(self, distribution: Distribution, *,
-                 x_off: float=0.0, y_off: float=0.0, z_off: float=0.0, sig_pz: float=0.1) -> None:
+    def generate(self, distribution: Distribution, *, n: float,
+                 x_off: float=0.0, y_off: float=0.0, z_off: float=0.0, sig_pz: float=0.01) -> None:
         '''Beam generator
 
         This function generates a beam with a given distribution and initial beam displacement.
         '''
+        assert n > 0, 'The number of particles (n) must be a positive number!'
         assert type(distribution.name) == str, 'Distribution name must be a string!'
         condition = ((distribution.name == 'KV' or distribution.name == 'Uniform') or
                     (distribution.name == 'Gauss' or distribution.name == 'GA'))
         assert condition, 'Сheck distribution name!'
 
-        if distribution.name == 'KV' or distribution.name == 'Uniform':
+        self.n = n
+
+        if distribution.name == 'Uniform' or distribution.name == 'KV':
             phi = np.random.uniform(0, 2*np.pi, int(self.n))
             theta = np.random.uniform(0, np.pi, int(self.n))
-            self.x = distribution.x * np.sin(theta) * np.cos(phi)
-            self.y = distribution.y * np.sin(theta) * np.sin(phi)
-            self.z = distribution.z * np.cos(theta)
+            x = distribution.x * np.sin(theta) * np.cos(phi)
+            y = distribution.y * np.sin(theta) * np.sin(phi)
+            z = distribution.z * np.cos(theta)
 
         if distribution.name == 'Gauss' or distribution.name == 'GA':
-            self.x = np.random.normal(x_off, distribution.x, int(self.n))
-            self.y = np.random.normal(y_off, distribution.y, int(self.n))
-            self.z = np.random.normal(z_off, distribution.z, int(self.n))
+            x = np.random.normal(x_off, distribution.x, int(self.n))
+            y = np.random.normal(y_off, distribution.y, int(self.n))
+            z = np.random.normal(z_off, distribution.z, int(self.n))
 
-        self.px = np.random.normal(0, distribution.px, int(self.n))
-        self.py = np.random.normal(0, distribution.py, int(self.n))
-        self.pz = np.random.normal(distribution.pz, distribution.pz*sig_pz, int(self.n))
+        px = np.random.normal(0, distribution.px, int(self.n))
+        py = np.random.normal(0, distribution.py, int(self.n))
+        pz = np.random.normal(distribution.pz, distribution.pz * sig_pz, int(self.n))
 
-        self.data = np.row_stack((self.x, self.y, self.z, self.px, self.py, self.pz))
-        self.df = pd.DataFrame(np.transpose(self.data), columns=['x','y','z','px','py','pz'])
+        self.da = np.row_stack((x, y, z, px, py, pz))
+        self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
+
+    def upload(self, Y: np.array) -> None:
+        ''' Particle loading
+
+        Y = np.array[[ ... ] # x[m]
+                     [ ... ] # y[m]
+                     [ ... ] # z[m]
+                     [ ... ] # px[MeV/c]
+                     [ ... ] # py[MeV/c]
+                     [ ... ] # pz[MeV/c]
+                     ]
+        '''
+        self.da = Y
+        self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
+
+    @property
+    def save(self, file_name: str='') -> None:
+        ''' Particle saving
+
+        file_name = self.type.symbol + str(self.n) + '.csv'
+        '''
+        index = self.type.symbol + str(self.n) + '.csv'
+        self.df.to_csv(file_name) if file_name else self.df.to_csv(index)
 
     def __str__(self):
         return str(self.df)

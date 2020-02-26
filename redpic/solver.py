@@ -12,7 +12,7 @@ from .beam import *
 __all__ = [ 'Simulation',
             'Sim' ]
 
-def F(Y,t=0):
+def red(Y,t=0):
     x  = Y[0]
     y  = Y[1]
     z  = Y[2]
@@ -45,16 +45,15 @@ def F(Y,t=0):
 class Simulation:
     def __init__(self, beam):
         self.beam = beam
-
-    beam_track = {}
+        self.beam_track = {}
 
     def track(self):
-        Y = self.beam.particles
+        Y = self.beam.data
 
         cdt = 0.1 # m
         dt = cdt/r_0
 
-        ct_max = 50 # m
+        ct_max = 10 # m
         t_max = ct_max/r_0
 
         for t in np.arange(0,t_max,dt):
@@ -68,8 +67,8 @@ class Simulation:
             Y  = Y + (K1 + 2*K2 + 2*K3 + K4)/6
 
             # output:
-            df = pd.DataFrame(np.transpose(Y), columns=['x','y','z','px','py','pz'])
-
+            df = pd.DataFrame(np.transpose(Y),
+                              columns=['x','y','z','px','py','pz'])
             self.beam_track[t*r_0] = df
 
 
