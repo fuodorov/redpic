@@ -57,6 +57,7 @@ class Beam:
 
         self.da = np.row_stack((x, y, z, px, py, pz))
         self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
+        self.df.to_csv(self.type.symbol + 'Beam.csv')
 
     def upload(self, Y: np.array) -> None:
         ''' Particle loading
@@ -71,15 +72,6 @@ class Beam:
         '''
         self.da = Y
         self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
-
-    @property
-    def save(self, file_name: str='') -> None:
-        ''' Particle saving
-
-        file_name = self.type.symbol + str(self.n) + '.csv'
-        '''
-        index = self.type.symbol + str(self.n) + '.csv'
-        self.df.to_csv(file_name) if file_name else self.df.to_csv(index)
 
     def __str__(self):
         return str(self.df)
