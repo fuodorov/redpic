@@ -34,12 +34,11 @@ class Simulation:
         dt = dz/c
         t_max = (self.acc.z_stop-self.acc.z_start)/c
         Y = self.beam.da
-        P0 = (m*c*c) / (e*1e6)
-        const = 1.758820175e-14
-        E0 = 30_000 / (const*(m_e/m)*dt*1e6)
-        B0 = 1 / (const*(m_e/m)*dt*1.266e-2)
+        P0 = m*c*c / (e*1e6)
+        E0 = m*c / (e*dt*1e6)
+        B0 = m / (e*dt)
 
-        # RED schema
+        # RED
         for t in np.arange(0, t_max, 2*dt):
             Y[0], Y[1], Y[2] = Y[0]/dz, Y[1]/dz, Y[2]/dz
             Y[3], Y[4], Y[5] = Y[3]/P0, Y[4]/P0, Y[5]/P0
@@ -107,7 +106,7 @@ class Simulation:
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
             progress = t/t_max*100
             print( '\rz = %.2f m (%.1f %%) ' % (self.acc.z_start+t*c, progress), end='')
-            if progress%10 == 0:
-                df.to_csv(self.beam.type.symbol + 'Beam.'+ str(int(progress/10)) +'.csv')
+            if progress%5 == 0:
+                df.to_csv(self.beam.type.symbol + 'Beam.'+ '%04.0f' % ((self.acc.z_start+t*c)*100) +'.csv')
 
 Sim = Simulation
