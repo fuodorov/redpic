@@ -1,14 +1,12 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 [![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
-
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/fuodorov/redpic/master) 
 ## The PIC-code
 <a href="https://fuodorov.github.io">V. Fedorov</a>
 
 ## Overview
 
-...
-
-In order to use the REDPIC code correctly, it is **important to read the [Wiki](https://github.com/fuodorov/redpic/wiki).**
+In order to use the REDPIC code correctly, it is **important to read the [Know-How](https://github.com/fuodorov/redpic/notebooks).**
 
 ## Algorithm
 

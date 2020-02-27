@@ -1,6 +1,5 @@
 '''
-Relativictic Difference Scheme
-Particle-in-Cell code (REDPIC) solver file.
+Relativictic Difference Scheme Particle-in-Cell code (REDPIC) solver file.
 
 '''
 
@@ -105,8 +104,9 @@ class Simulation:
             df = pd.DataFrame(Xt, columns=['x','y','z','px','py','pz',
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
             progress = t/t_max*100
-            print( '\rz = %.2f m (%.1f %%) ' % (self.acc.z_start+t*c, progress), end='')
-            if progress%5 == 0:
-                df.to_csv(self.beam.type.symbol + 'Beam.'+ '%04.0f' % ((self.acc.z_start+t*c)*100) +'.csv')
+            meters = self.acc.z_start+t*c
+            print( '\rz = %.2f m (%.1f %%) ' % (meters, progress), end='')
+            if progress%3 == 0 or progress%4 == 0:
+                df.to_csv(self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters*100) +'.csv')
 
 Sim = Simulation

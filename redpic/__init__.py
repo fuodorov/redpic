@@ -1,6 +1,5 @@
 '''
-Relativictic Difference Scheme
-Particle-in-Cell code (REDPIC) init file.
+Relativictic Difference Scheme Particle-in-Cell code (REDPIC) init file.
 
 '''
 

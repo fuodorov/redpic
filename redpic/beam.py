@@ -1,6 +1,5 @@
 '''
-Relativictic Difference Scheme
-Particle-in-Cell code (REDPIC) beam file.
+Relativictic Difference Scheme Particle-in-Cell code (REDPIC) beam file.
 
 '''
 
