@@ -1,6 +1,7 @@
 redpic
 kenv
 numpy
+numba
 scipy
 collections
 periodictable
