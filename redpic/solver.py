@@ -63,18 +63,18 @@ def sum_field_particle(n: int, Fx: np.array, Fy: np.array, Fz: np.array,
                       ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
                       ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i])))
         rrr[i] = float(np.inf)
-        Fx = Fx + (x - x[i])/rrr
+        Fx = Fx + (x - x[i])/rrr 
         Fy = Fy + (y - y[i])/rrr
         Fz = Fz + (z - z[i])/rrr
     return Fx, Fy, Fz
 
 def get_field_beam(beam: Beam, type: str,
                    x: np.array, y: np.array, z: np.array) -> (np.array, np.array, np.array):
-    ''' Get an electric or magnetic field space charge at a specific location in the accelerator
+    ''' Get an electric [MV/m] or magnetic [T] field space charge at a specific location in the accelerator
 
     '''
     assert type == 'E' or type == 'B', 'Check type field! (E or B)'
-    q = beam.macro_charge
+    Q = beam.macro_charge
     n = int(beam.n)
     ke = 1/(4*np.pi*ep_0*1e6)
     kb = mu_0/(4*np.pi)
@@ -82,10 +82,10 @@ def get_field_beam(beam: Beam, type: str,
     Bx, By, Bz = np.zeros(n), np.zeros(n), np.zeros(n)
     if type == 'E':
         Ex, Ey, Ez = sum_field_particle(n, Ex, Ey, Ez, x, y, z)
-        return ke*q*Ex, ke*q*Ey, ke*q*Ez
+        return ke*Q*Ex, ke*Q*Ey, ke*Q*Ez
     if type == 'B':
         Bx, By, Bz = sum_field_particle(n, Bx, By, Bz, x, y, z)
-        return kb*q*Bx, -kb*q*By, 0*Bz
+        return kb*Q*Bx, -kb*Q*By, 0*Bz
 
 class Simulation:
     ''' Simulation of the beam tracking in the accelerator
@@ -99,10 +99,10 @@ class Simulation:
         ''' Tracking!
 
         '''
-
         # Constants
         m = self.beam.type.mass
         q = self.beam.type.charge
+        Q = self.beam.macro_charge
         dz = self.acc.dz
         dt = dz/c
         t_max = (self.acc.z_stop-self.acc.z_start)/c
@@ -129,7 +129,6 @@ class Simulation:
                 ex, ey, ez = get_field_beam(self.beam, 'E',
                                             Y[0]*dz, Y[1]*dz, Y[2]*dz)
                 ex, ey, ez = ex/E0, ey/E0, ez/E0
-
                 Ex, Ey, Ez = Ex + ex, Ey + ey, Ez + ez
 
             # first step in RED
@@ -148,7 +147,6 @@ class Simulation:
                 bx, by, bz = get_field_beam(self.beam, 'B',
                                             Y[0]*dz, Y[1]*dz, Y[2]*dz)
                 bx, by, bz = bx*vz/B0, by*vz/B0, bz*vz/B0
-
                 Bx, By, Bz = Bx + bx, By + by, Bz + bz
 
             # second step in RED
