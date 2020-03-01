@@ -1,10 +1,12 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 [![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/fuodorov/redpic/master) 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/fuodorov/redpic/master)
 ## The PIC-code
 <a href="https://fuodorov.github.io">V. Fedorov</a>
 
 ## Overview
+
+This PIC code has been developed since 2020 at the Budker Institute of Nuclear Physics as an alternative to ASTRA, SAM, and other codes. For particle dynamics simulation using finite difference scheme relativistic.
 
 In order to use the REDPIC code correctly, it is **important to read the [Know-How](https://github.com/fuodorov/redpic/notebooks).**
 

@@ -18,12 +18,12 @@ class Beam:
 
     '''
 
-    def __init__(self, type: Element, *, macro_charge: float=0.0) -> None:
+    def __init__(self, type: Element, *, charge: float=0.0) -> None:
         self.type = type        # particles type
+        self.charge = charge
         self.n = 0.0            # quantity
         self.da = np.array      # data array
         self.df = pd.DataFrame  # data frame
-        self.macro_charge = macro_charge
 
     def generate(self, distribution: Distribution, *, n: float,
                  x_off: float=0.0, y_off: float=0.0, z_off: float=0.0, sig_pz: float=0.01) -> None:
@@ -44,18 +44,18 @@ class Beam:
             theta = np.random.uniform(0, np.pi, int(self.n))
             x = distribution.x * np.sin(theta) * np.cos(phi)
             y = distribution.y * np.sin(theta) * np.sin(phi)
-            z = distribution.z * np.cos(theta) / 2
-
+            px = distribution.px * np.sin(theta) * np.cos(phi)
+            py = distribution.py * np.sin(theta) * np.sin(phi)
         if distribution.name == 'Gauss' or distribution.name == 'GA':
             x = np.random.normal(x_off, distribution.x, int(self.n))
             y = np.random.normal(y_off, distribution.y, int(self.n))
-            z = np.random.normal(z_off, distribution.z, int(self.n)) / 2
+            px = np.random.normal(0, distribution.px, int(self.n))
+            py = np.random.normal(0, distribution.py, int(self.n))
 
-        px = np.random.normal(0, distribution.px, int(self.n))
-        py = np.random.normal(0, distribution.py, int(self.n))
+        z = np.random.uniform(-distribution.z, distribution.z, int(self.n)) / 2
         pz = np.random.normal(distribution.pz, distribution.pz * sig_pz, int(self.n))
 
-        self.da = np.row_stack((x, y, z - distribution.z/2, px, py, pz))
+        self.da = np.row_stack((x, y, z, px, py, pz))
         self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
         self.df.to_csv(self.type.symbol + 'Beam.csv')
 

@@ -52,40 +52,87 @@ def get_field_accelerator(acc: Accelerator, type: str,
         return Bx, By, Bz
 
 @numba.jit(nopython=True, parallel=True)
-def sum_field_particle(n: int, Fx: np.array, Fy: np.array, Fz: np.array,
-                       x: np.array, y: np.array, z: np.array) -> (np.array, np.array, np.array):
+def sum_field_particle(x: np.array, y: np.array, z: np.array, z_start: float=0.0) -> (np.array, np.array, np.array):
     ''' Sum particles fields
 
     '''
+    n = int(len(x))
+    Fx, Fy, Fz = np.zeros(n), np.zeros(n), np.zeros(n)
     rrr = np.zeros(n)
     for i in np.arange(int(n)):
-        rrr = np.sqrt(((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
-                      ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
-                      ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i])))
-        rrr[i] = float(np.inf)
-        Fx = Fx + (x - x[i])/rrr 
-        Fy = Fy + (y - y[i])/rrr
-        Fz = Fz + (z - z[i])/rrr
+        if z[i] >= z_start:
+            rrr = np.sqrt(((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
+                          ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
+                          ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i])))
+            rrr[i] = float(np.inf)
+            Fx = Fx + (x - x[i])/rrr
+            Fy = Fy + (y - y[i])/rrr
+            Fz = Fz + (z - z[i])/rrr
     return Fx, Fy, Fz
 
-def get_field_beam(beam: Beam, type: str,
+def get_field_beam(beam: Beam, acc: Accelerator, type: str,
                    x: np.array, y: np.array, z: np.array) -> (np.array, np.array, np.array):
     ''' Get an electric [MV/m] or magnetic [T] field space charge at a specific location in the accelerator
 
     '''
     assert type == 'E' or type == 'B', 'Check type field! (E or B)'
-    Q = beam.macro_charge
-    n = int(beam.n)
-    ke = 1/(4*np.pi*ep_0*1e6)
-    kb = mu_0/(4*np.pi)
-    Ex, Ey, Ez = np.zeros(n), np.zeros(n), np.zeros(n)
-    Bx, By, Bz = np.zeros(n), np.zeros(n), np.zeros(n)
+    Q = beam.charge
+    q = beam.charge / beam.n
+    ke = 1 / (4*np.pi*ep_0*1e6) / 33.3564
+    km = mu_0 / (4*np.pi) / 33.3564
+
     if type == 'E':
-        Ex, Ey, Ez = sum_field_particle(n, Ex, Ey, Ez, x, y, z)
-        return ke*Q*Ex, ke*Q*Ey, ke*Q*Ez
+        Ex, Ey, Ez = sum_field_particle(x, y, z, acc.z_start)
+        return ke*q*Ex, ke*q*Ey, ke*q*Ez
     if type == 'B':
-        Bx, By, Bz = sum_field_particle(n, Bx, By, Bz, x, y, z)
-        return kb*Q*Bx, -kb*Q*By, 0*Bz
+        Bx, By, Bz = sum_field_particle(x, y, z, acc.z_start)
+        return km*q*Bx, -km*q*By, 0*Bz
+
+@numba.jit(nopython=True, parallel=True)
+def first_step_red(x: np.array, y: np.array, z: np.array, px: np.array, py: np.array, pz: np.array,
+                   Fx: np.array, Fy: np.array, Fz: np.array, z_start: float=0.0) -> None:
+    ''' First step for Relativictic Difference Scheme
+
+    '''
+    n = int(len(x))
+    for i in np.arange(int(n)):
+        if z[i] >= z_start:
+            px[i], py[i], pz[i] = px[i] + 2*Fx[i], py[i] + 2*Fy[i], pz[i] + 2*Fz[i]
+            gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
+            vx, vy, vz = px[i]/gamma, py[i]/gamma, pz[i]/gamma
+            x[i], y[i], z[i] = x[i] + vx, y[i] + vy, z[i] + vz
+        else:
+            gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
+            vz = pz[i]/gamma
+            x[i], y[i], z[i] = x[i], y[i], z[i] + vz
+
+
+@numba.jit(nopython=True, parallel=True)
+def second_step_red(x: np.array, y: np.array, z: np.array, px: np.array, py: np.array, pz: np.array,
+                    Fx: np.array, Fy: np.array, Fz: np.array, z_start: float=0.0) -> None:
+    ''' Second step for Relativictic Difference Scheme
+
+    '''
+    n = int(len(x))
+    for i in np.arange(int(n)):
+        if z[i] >= z_start:
+            gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
+            vx, vy, vz = px[i]/gamma, py[i]/gamma, pz[i]/gamma
+            b2 = 1 + Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]
+            b1 = 2 - b2
+            b3 = 2 * (vx*Fx[i] + vy*Fy[i] + vz*Fz[i])
+            fx = 2 * (vy*Fz[i] - vz*Fy[i])
+            fy = 2 * (vz*Fx[i] - vx*Fz[i])
+            fz = 2 * (vx*Fy[i] - vy*Fx[i])
+            vx = (vx*b1 + fx + Fx[i]*b3)/b2
+            vy = (vy*b1 + fy + Fy[i]*b3)/b2
+            vz = (vz*b1 + fz + Fz[i]*b3)/b2
+            x[i], y[i], z[i] = x[i] + vx, y[i] + vy, z[i] + vz
+            px[i], py[i], pz[i] = vx*gamma, vy*gamma, vz*gamma
+        else:
+            gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
+            vz = pz[i]/gamma
+            x[i], y[i], z[i] = x[i], y[i], z[i] + vz
 
 class Simulation:
     ''' Simulation of the beam tracking in the accelerator
@@ -100,14 +147,14 @@ class Simulation:
 
         '''
         # Constants
+        Y = self.beam.da
+        Y[2] = Y[2] + self.acc.z_start - max(Y[2]) # set initial beam position
         m = self.beam.type.mass
         q = self.beam.type.charge
-        Q = self.beam.macro_charge
+        Q = self.beam.charge
         dz = self.acc.dz
         dt = dz/c
-        t_max = (self.acc.z_stop-self.acc.z_start)/c
-        Y = self.beam.da
-        Y[2] = Y[2] + self.acc.z_start
+        t_max = (self.acc.z_stop-self.acc.z_start)/c + (max(Y[2]) - min(Y[2]))/c
         P0 = m*c*c / (e*1e6)
         E0 = m*c / (q*dt*1e6)
         B0 = m / (q*dt)
@@ -125,17 +172,16 @@ class Simulation:
             Ex, Ey, Ez = Ex/E0, Ey/E0, Ez/E0
 
             # get electric field from beam
-            if self.beam.macro_charge:
-                ex, ey, ez = get_field_beam(self.beam, 'E',
+            if self.beam.charge:
+                ex, ey, ez = get_field_beam(self.beam, self.acc, 'E',
                                             Y[0]*dz, Y[1]*dz, Y[2]*dz)
                 ex, ey, ez = ex/E0, ey/E0, ez/E0
                 Ex, Ey, Ez = Ex + ex, Ey + ey, Ez + ez
 
-            # first step in RED
-            Y[3], Y[4], Y[5] = Y[3] + 2*Ex, Y[4] + 2*Ey, Y[5] + 2*Ez
+            # first step RED
+            first_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, self.acc.z_start/dz)
             gamma = np.sqrt(1 + Y[3]*Y[3] + Y[4]*Y[4] + Y[5]*Y[5])
             vx, vy, vz = Y[3]/gamma, Y[4]/gamma, Y[5]/gamma
-            Y[0], Y[1], Y[2] = Y[0] + vx, Y[1] + vy, Y[2] + vz
 
             # get magnetic field from accelerator
             Bx, By, Bz = get_field_accelerator(self.acc, 'B',
@@ -143,24 +189,16 @@ class Simulation:
             Bx, By, Bz = Bx/B0/gamma, By/B0/gamma, Bz/B0/gamma
 
             # get magnetic field from beam
-            if self.beam.macro_charge:
-                bx, by, bz = get_field_beam(self.beam, 'B',
+            if self.beam.charge:
+                bx, by, bz = get_field_beam(self.beam, self.acc, 'B',
                                             Y[0]*dz, Y[1]*dz, Y[2]*dz)
                 bx, by, bz = bx*vz/B0, by*vz/B0, bz*vz/B0
                 Bx, By, Bz = Bx + bx, By + by, Bz + bz
 
-            # second step in RED
-            b2 = 1 + Bx*Bx + By*By + Bz*Bz
-            b1 = 2 - b2
-            b3 = 2 * (vx*Bx + vy*By + vz*Bz)
-            fx = 2 * (vy*Bz - vz*By)
-            fy = 2 * (vz*Bx - vx*Bz)
-            fz = 2 * (vx*By - vy*Bx)
-            vx = (vx*b1 + fx + Bx*b3)/b2
-            vy = (vy*b1 + fy + By*b3)/b2
-            vz = (vz*b1 + fz + Bz*b3)/b2
-            Y[0], Y[1], Y[2] = Y[0] + vx, Y[1] + vy, Y[2] + vz
-            Y[3], Y[4], Y[5] = vx*gamma, vy*gamma, vz*gamma
+            # second step RED
+            second_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, self.acc.z_start/dz)
+            gamma = np.sqrt(1 + Y[3]*Y[3] + Y[4]*Y[4] + Y[5]*Y[5])
+            vx, vy, vz = Y[3]/gamma, Y[4]/gamma, Y[5]/gamma
 
             # into the SI
             Y[0], Y[1], Y[2] = Y[0]*dz, Y[1]*dz, Y[2]*dz
@@ -175,7 +213,7 @@ class Simulation:
             Xt = np.transpose(X)
             df = pd.DataFrame(Xt, columns=['x','y','z','px','py','pz',
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
-            if progress%2 <= dt/t_max*100:
+            if progress%4 <= dt/t_max*100:
                 df.to_csv(self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters*100) +'.csv')
             print( '\rz = %.2f m (%.1f %%) ' % (meters, progress), end='')
 
