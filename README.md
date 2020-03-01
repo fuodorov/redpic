@@ -8,7 +8,7 @@
 
 This PIC code has been developed since 2020 at the Budker Institute of Nuclear Physics as an alternative to ASTRA, WARP, and other codes. For particle dynamics simulation using finite difference scheme relativistic.
 
-In order to use the REDPIC code correctly, it is **important to read the [Know-How](https://github.com/fuodorov/redpic/notebooks).**
+In order to use the REDPIC code correctly, it is **important to read the [Know-How](https://github.com/fuodorov/redpic/tree/master/notebooks).**
 
 ## Algorithm
 
