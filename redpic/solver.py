@@ -3,9 +3,9 @@ Relativictic Difference Scheme Particle-in-Cell code (REDPIC) solver file.
 
 '''
 
-import numba
 import numpy as np
 import pandas as pd
+from numba import jit, prange
 from scipy import misc
 from .constants import *
 from .beam import *
@@ -53,24 +53,24 @@ def get_field_accelerator(acc: Accelerator, type: str,
         By = By + Gz*x_corr - dBzdz*y_corr/2 - dBzdz*y_corr/2 + Bz*offset_yp     # row remainder
         return Bx, By, Bz
 
-@numba.jit(nopython=True, parallel=True, fastmath=True, nogil=True, cache=True)
+@jit(nopython=True, parallel=True, fastmath=True, cache=True)
 def sum_field_particle(x: np.array, y: np.array, z: np.array,
+                       Fx: np.array, Fy: np.array, Fz: np.array,
                        z_start: float=0.0) -> (np.array, np.array, np.array):
     ''' Sum particles fields
 
     '''
     n = int(len(x))
-    Fx, Fy, Fz = np.zeros(n), np.zeros(n), np.zeros(n)
     r3 = np.zeros(n)
-    for i in np.arange(int(n)):
-        if z[i] >= z_start:
-            r3 = np.sqrt(((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
-                          ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
-                          ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i])))
-            r3[i] = float(np.inf)
-            Fx = Fx + (x - x[i])/r3
-            Fy = Fy + (y - y[i])/r3
-            Fz = Fz + (z - z[i])/r3
+    for k in prange(int(n)):
+        for i in prange(int(n)):
+            if z[i] >= z_start and i!=k:
+                r3[k] = np.sqrt(((x[k] - x[i])*(x[k] - x[i]) + (y[k] - y[i])*(y[k] - y[i]) + (z[k] - z[i])*(z[k] - z[i]))*
+                                ((x[k] - x[i])*(x[k] - x[i]) + (y[k] - y[i])*(y[k] - y[i]) + (z[k] - z[i])*(z[k] - z[i]))*
+                                ((x[k] - x[i])*(x[k] - x[i]) + (y[k] - y[i])*(y[k] - y[i]) + (z[k] - z[i])*(z[k] - z[i])))
+                Fx[k] = Fx[k] + (x[k] - x[i])/r3[k]
+                Fy[k] = Fy[k] + (y[k] - y[i])/r3[k]
+                Fz[k] = Fz[k] + (z[k] - z[i])/r3[k]
     return Fx, Fy, Fz
 
 def get_field_beam(beam: Beam, acc: Accelerator, type: str,
@@ -85,15 +85,16 @@ def get_field_beam(beam: Beam, acc: Accelerator, type: str,
     q = beam.charge / beam.n
     ke = 1 / (4*np.pi*ep_0*1e6) / 33.3564
     km = mu_0 / (4*np.pi) / 33.3564
-
+    n = int(len(x))
+    Fx, Fy, Fz = np.zeros(n), np.zeros(n), np.zeros(n)
     if type == 'E':
-        Ex, Ey, Ez = sum_field_particle(x, y, z, acc.z_start)
+        Ex, Ey, Ez = sum_field_particle(x, y, z, Fx, Fy, Fz, acc.z_start)
         return ke*q*Ex, ke*q*Ey, ke*q*Ez
     if type == 'B':
-        Bx, By, Bz = sum_field_particle(x, y, z, acc.z_start)
+        Bx, By, Bz = sum_field_particle(x, y, z, Fx, Fy, Fz, acc.z_start)
         return km*q*Bx, -km*q*By, 0*Bz
 
-@numba.jit(nopython=True, parallel=True, fastmath=True, nogil=True, cache=True)
+@jit(nopython=True, parallel=True, fastmath=True, cache=True)
 def first_step_red(x: np.array, y: np.array, z: np.array,
                    px: np.array, py: np.array, pz: np.array,
                    Fx: np.array, Fy: np.array, Fz: np.array,
@@ -103,7 +104,7 @@ def first_step_red(x: np.array, y: np.array, z: np.array,
 
     '''
     n = int(len(x))
-    for i in np.arange(int(n)):
+    for i in prange(int(n)):
         if z[i] >= z_start:
             px[i], py[i], pz[i] = px[i] + 2*Fx[i], py[i] + 2*Fy[i], pz[i] + 2*Fz[i]
             gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
@@ -116,7 +117,7 @@ def first_step_red(x: np.array, y: np.array, z: np.array,
     return x, y, z, px, py, pz
 
 
-@numba.jit(nopython=True, parallel=True, fastmath=True, nogil=True, cache=True)
+@jit(nopython=True, parallel=True, fastmath=True, cache=True)
 def second_step_red(x: np.array, y: np.array, z: np.array,
                     px: np.array, py: np.array, pz: np.array,
                     Fx: np.array, Fy: np.array, Fz: np.array,
@@ -126,7 +127,7 @@ def second_step_red(x: np.array, y: np.array, z: np.array,
 
     '''
     n = int(len(x))
-    for i in np.arange(int(n)):
+    for i in prange(int(n)):
         if z[i] >= z_start:
             gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
             vx, vy, vz = px[i]/gamma, py[i]/gamma, pz[i]/gamma
