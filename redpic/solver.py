@@ -5,7 +5,6 @@ Relativictic Difference Scheme Particle-in-Cell code (REDPIC) solver file.
 
 import numpy as np
 import pandas as pd
-from multiprocessing import Process
 from numba import jit, prange
 from scipy import misc
 from .constants import *
@@ -246,9 +245,7 @@ class Simulation:
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
             file_name = self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters * 100) +'.csv'
             if progress % (100 // n_files) <= dt / t_max * 100:
-                #df.to_csv(file_name)
-                writer = Process(target=df.to_csv, args=(file_name,), daemon=True)
-                writer.start()
+                df.to_csv(file_name)
             print( '\rz = %.2f m (%.1f %%) ' % (meters, progress), end='')
 
 Sim = Simulation
