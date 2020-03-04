@@ -5,6 +5,7 @@ Relativictic Difference Scheme Particle-in-Cell code (REDPIC) solver file.
 
 import numpy as np
 import pandas as pd
+from multiprocessing import Process
 from numba import jit, prange
 from scipy import misc
 from .constants import *
@@ -62,15 +63,13 @@ def sum_field_particle(x: np.array, y: np.array, z: np.array,
     '''
     n = int(len(x))
     r3 = np.zeros(n)
-    for k in prange(int(n)):
-        for i in prange(int(n)):
-            if z[i] >= z_start and i!=k:
-                r3[k] = np.sqrt(((x[k] - x[i])*(x[k] - x[i]) + (y[k] - y[i])*(y[k] - y[i]) + (z[k] - z[i])*(z[k] - z[i]))*
-                                ((x[k] - x[i])*(x[k] - x[i]) + (y[k] - y[i])*(y[k] - y[i]) + (z[k] - z[i])*(z[k] - z[i]))*
-                                ((x[k] - x[i])*(x[k] - x[i]) + (y[k] - y[i])*(y[k] - y[i]) + (z[k] - z[i])*(z[k] - z[i])))
-                Fx[k] = Fx[k] + (x[k] - x[i])/r3[k]
-                Fy[k] = Fy[k] + (y[k] - y[i])/r3[k]
-                Fz[k] = Fz[k] + (z[k] - z[i])/r3[k]
+    for i in prange(int(n)):
+        if z[i] >= z_start:
+            r3 = np.sqrt(((x - x[i])**2 + (y - y[i])**2 + (z - z[i])**2))**3
+            r3[i] = float(np.inf)
+            Fx += (x - x[i]) / r3
+            Fy += (y - y[i]) / r3
+            Fz += (z - z[i]) / r3
     return Fx, Fy, Fz
 
 def get_field_beam(beam: Beam, acc: Accelerator, type: str,
@@ -106,16 +105,21 @@ def first_step_red(x: np.array, y: np.array, z: np.array,
     n = int(len(x))
     for i in prange(int(n)):
         if z[i] >= z_start:
-            px[i], py[i], pz[i] = px[i] + 2*Fx[i], py[i] + 2*Fy[i], pz[i] + 2*Fz[i]
+            px[i] += 2*Fx[i]
+            py[i] += 2*Fy[i]
+            pz[i] += 2*Fz[i]
             gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
-            vx, vy, vz = px[i]/gamma, py[i]/gamma, pz[i]/gamma
-            x[i], y[i], z[i] = x[i] + vx, y[i] + vy, z[i] + vz
+            vx = px[i]/gamma
+            vy = py[i]/gamma
+            vz = pz[i]/gamma
+            x[i] += vx
+            y[i] += vy
+            z[i] += vz
         else:
             gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
             vz = pz[i]/gamma
-            x[i], y[i], z[i] = x[i], y[i], z[i] + vz
+            z[i] += vz
     return x, y, z, px, py, pz
-
 
 @jit(nopython=True, parallel=True, fastmath=True, cache=True)
 def second_step_red(x: np.array, y: np.array, z: np.array,
@@ -140,12 +144,16 @@ def second_step_red(x: np.array, y: np.array, z: np.array,
             vx = (vx*b1 + fx + Fx[i]*b3)/b2
             vy = (vy*b1 + fy + Fy[i]*b3)/b2
             vz = (vz*b1 + fz + Fz[i]*b3)/b2
-            x[i], y[i], z[i] = x[i] + vx, y[i] + vy, z[i] + vz
-            px[i], py[i], pz[i] = vx*gamma, vy*gamma, vz*gamma
+            x[i] += vx
+            y[i] += vy
+            z[i] += vz
+            px[i] = vx*gamma
+            py[i] = vy*gamma
+            pz[i] = vz*gamma
         else:
             gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
             vz = pz[i]/gamma
-            x[i], y[i], z[i] = x[i], y[i], z[i] + vz
+            z[i] += vz
     return x, y, z, px, py, pz
 
 class Simulation:
@@ -156,7 +164,7 @@ class Simulation:
         self.beam = beam
         self.acc = accelerator
 
-    def track(self, *, n_files: int=30) -> None:
+    def track(self, *, n_files: int=15) -> None:
         ''' Tracking!
 
         '''
@@ -236,8 +244,11 @@ class Simulation:
             Xt = np.transpose(X)
             df = pd.DataFrame(Xt, columns=[ 'x','y','z','px','py','pz',
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
+            file_name = self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters * 100) +'.csv'
             if progress % (100 // n_files) <= dt / t_max * 100:
-                df.to_csv(self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters * 100) +'.csv')
+                #df.to_csv(file_name)
+                writer = Process(target=df.to_csv, args=(file_name,), daemon=True)
+                writer.start()
             print( '\rz = %.2f m (%.1f %%) ' % (meters, progress), end='')
 
 Sim = Simulation
