@@ -3,7 +3,6 @@ kenv
 numpy
 numba
 scipy
-collections
 periodictable
 pandas
 deap
