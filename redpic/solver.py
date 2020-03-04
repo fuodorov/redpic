@@ -16,7 +16,9 @@ __all__ = [ 'Simulation',
              ]
 
 def get_field_accelerator(acc: Accelerator, type: str,
-                          x: np.array, y: np.array, z: np.array) -> (np.array, np.array, np.array):
+                          x: np.array, y: np.array, z: np.array) -> (np.array,
+                                                                     np.array,
+                                                                     np.array):
     ''' Get an electric or magnetic field at a specific location in the accelerator
 
     '''
@@ -35,9 +37,9 @@ def get_field_accelerator(acc: Accelerator, type: str,
         Ez = acc.Ez(z)
         dEzdz = acc.dEzdz(z)
         d2Ezdz2 = misc.derivative(acc.dEzdz, z, dx=dz, n=1)
-        Ez = (Ez - d2Ezdz2*r_corr*r_corr/4 - d2Ezdz2*r_corr*r_corr/4)           # row remainder
-        Ex = (- dEzdz*x_corr/2 - dEzdz*x_corr/2 + Ez*offset_xp)                 # row remainder
-        Ey = (- dEzdz*y_corr/2 - dEzdz*y_corr/2 + Ez*offset_yp)                 # row remainder
+        Ez = Ez - d2Ezdz2*r_corr*r_corr/4 - d2Ezdz2*r_corr*r_corr/4           # row remainder
+        Ex = - dEzdz*x_corr/2 - dEzdz*x_corr/2 + Ez*offset_xp                # row remainder
+        Ey = - dEzdz*y_corr/2 - dEzdz*y_corr/2 + Ez*offset_yp                # row remainder
         return Ex, Ey, Ez
     if type == 'B':
         Bx = acc.Bx(z)
@@ -46,32 +48,35 @@ def get_field_accelerator(acc: Accelerator, type: str,
         dBzdz = acc.dBzdz(z)
         d2Bzdz2 = misc.derivative(acc.dBzdz, z, dx=dz, n=1)
         Gz = acc.Gz(z)
-        Bz = (Bz - d2Bzdz2*r_corr*r_corr/4 - d2Bzdz2*r_corr*r_corr/4)              # row remainder
-        Bx = (Bx + Gz*y_corr - dBzdz*x_corr/2 - dBzdz*x_corr/2 + Bz*offset_xp)     # row remainder
-        By = (By + Gz*x_corr - dBzdz*y_corr/2 - dBzdz*y_corr/2 + Bz*offset_yp)     # row remainder
+        Bz = Bz - d2Bzdz2*r_corr*r_corr/4 - d2Bzdz2*r_corr*r_corr/4                # row remainder
+        Bx = Bx + Gz*y_corr - dBzdz*x_corr/2 - dBzdz*x_corr/2 + Bz*offset_xp     # row remainder
+        By = By + Gz*x_corr - dBzdz*y_corr/2 - dBzdz*y_corr/2 + Bz*offset_yp     # row remainder
         return Bx, By, Bz
 
-@numba.jit(nopython=True, parallel=True)
-def sum_field_particle(x: np.array, y: np.array, z: np.array, z_start: float=0.0) -> (np.array, np.array, np.array):
+@numba.jit(nopython=True, parallel=True, fastmath=True, nogil=True, cache=True)
+def sum_field_particle(x: np.array, y: np.array, z: np.array,
+                       z_start: float=0.0) -> (np.array, np.array, np.array):
     ''' Sum particles fields
 
     '''
     n = int(len(x))
     Fx, Fy, Fz = np.zeros(n), np.zeros(n), np.zeros(n)
-    rrr = np.zeros(n)
+    r3 = np.zeros(n)
     for i in np.arange(int(n)):
         if z[i] >= z_start:
-            rrr = np.sqrt(((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
+            r3 = np.sqrt(((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
                           ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i]))*
                           ((x - x[i])*(x - x[i]) + (y - y[i])*(y - y[i]) + (z - z[i])*(z - z[i])))
-            rrr[i] = float(np.inf)
-            Fx = Fx + (x - x[i])/rrr
-            Fy = Fy + (y - y[i])/rrr
-            Fz = Fz + (z - z[i])/rrr
+            r3[i] = float(np.inf)
+            Fx = Fx + (x - x[i])/r3
+            Fy = Fy + (y - y[i])/r3
+            Fz = Fz + (z - z[i])/r3
     return Fx, Fy, Fz
 
 def get_field_beam(beam: Beam, acc: Accelerator, type: str,
-                   x: np.array, y: np.array, z: np.array) -> (np.array, np.array, np.array):
+                   x: np.array, y: np.array, z: np.array) -> (np.array,
+                                                              np.array,
+                                                              np.array):
     ''' Get an electric [MV/m] or magnetic [T] field space charge at a specific location in the accelerator
 
     '''
@@ -88,9 +93,12 @@ def get_field_beam(beam: Beam, acc: Accelerator, type: str,
         Bx, By, Bz = sum_field_particle(x, y, z, acc.z_start)
         return km*q*Bx, -km*q*By, 0*Bz
 
-@numba.jit(nopython=True, parallel=True)
-def first_step_red(x: np.array, y: np.array, z: np.array, px: np.array, py: np.array, pz: np.array,
-                   Fx: np.array, Fy: np.array, Fz: np.array, z_start: float=0.0) -> None:
+@numba.jit(nopython=True, parallel=True, fastmath=True, nogil=True, cache=True)
+def first_step_red(x: np.array, y: np.array, z: np.array,
+                   px: np.array, py: np.array, pz: np.array,
+                   Fx: np.array, Fy: np.array, Fz: np.array,
+                   z_start: float=0.0) -> (np.array, np.array, np.array,
+                                           np.array, np.array, np.array):
     ''' First step for Relativictic Difference Scheme
 
     '''
@@ -105,11 +113,15 @@ def first_step_red(x: np.array, y: np.array, z: np.array, px: np.array, py: np.a
             gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
             vz = pz[i]/gamma
             x[i], y[i], z[i] = x[i], y[i], z[i] + vz
+    return x, y, z, px, py, pz
 
 
-@numba.jit(nopython=True, parallel=True)
-def second_step_red(x: np.array, y: np.array, z: np.array, px: np.array, py: np.array, pz: np.array,
-                    Fx: np.array, Fy: np.array, Fz: np.array, z_start: float=0.0) -> None:
+@numba.jit(nopython=True, parallel=True, fastmath=True, nogil=True, cache=True)
+def second_step_red(x: np.array, y: np.array, z: np.array,
+                    px: np.array, py: np.array, pz: np.array,
+                    Fx: np.array, Fy: np.array, Fz: np.array,
+                    z_start: float=0.0) -> (np.array, np.array, np.array,
+                                            np.array, np.array, np.array):
     ''' Second step for Relativictic Difference Scheme
 
     '''
@@ -133,6 +145,7 @@ def second_step_red(x: np.array, y: np.array, z: np.array, px: np.array, py: np.
             gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
             vz = pz[i]/gamma
             x[i], y[i], z[i] = x[i], y[i], z[i] + vz
+    return x, y, z, px, py, pz
 
 class Simulation:
     ''' Simulation of the beam tracking in the accelerator
@@ -142,10 +155,12 @@ class Simulation:
         self.beam = beam
         self.acc = accelerator
 
-    def track(self):
+    def track(self, *, n_files: int=30) -> None:
         ''' Tracking!
 
         '''
+        assert n_files > 0, 'The number of files (n_files) must be a positive number!'
+
         # Constants
         Y = self.beam.da
         Y[2] = Y[2] + self.acc.z_start - max(Y[2]) # set initial beam position
@@ -154,7 +169,7 @@ class Simulation:
         Q = self.beam.charge
         dz = self.acc.dz
         dt = dz/c
-        t_max = (self.acc.z_stop-self.acc.z_start)/c + (max(Y[2]) - min(Y[2]))/c
+        t_max = (self.acc.z_stop-self.acc.z_start)/c + (max(Y[2])-min(Y[2]))/c
         P0 = m*c*c / (e*1e6)
         E0 = m*c / (q*dt*1e6)
         B0 = m / (q*dt)
@@ -179,7 +194,10 @@ class Simulation:
                 Ex, Ey, Ez = Ex + ex, Ey + ey, Ez + ez
 
             # first step RED
-            first_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, self.acc.z_start/dz)
+            Y[0], Y[1], Y[2], Y[3], Y[4], Y[5] = first_step_red(Y[0], Y[1], Y[2],
+                                                                Y[3], Y[4], Y[5],
+                                                                Ex, Ey, Ez,
+                                                                self.acc.z_start/dz)
             gamma = np.sqrt(1 + Y[3]*Y[3] + Y[4]*Y[4] + Y[5]*Y[5])
             vx, vy, vz = Y[3]/gamma, Y[4]/gamma, Y[5]/gamma
 
@@ -196,7 +214,10 @@ class Simulation:
                 Bx, By, Bz = Bx + bx, By + by, Bz + bz
 
             # second step RED
-            second_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, self.acc.z_start/dz)
+            Y[0], Y[1], Y[2], Y[3], Y[4], Y[5] = second_step_red(Y[0], Y[1], Y[2],
+                                                                 Y[3], Y[4], Y[5],
+                                                                 Bx, By, Bz,
+                                                                 self.acc.z_start/dz)
             gamma = np.sqrt(1 + Y[3]*Y[3] + Y[4]*Y[4] + Y[5]*Y[5])
             vx, vy, vz = Y[3]/gamma, Y[4]/gamma, Y[5]/gamma
 
@@ -207,14 +228,15 @@ class Simulation:
             Ex, Ey, Ez = Ex*E0, Ey*E0, Ez*E0
 
             # output in files (symbolBeam.XXXX.csv)
-            progress = t/t_max*100
+            progress = t / t_max * 100
             meters = self.acc.z_start+t*c
-            X = np.row_stack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, Ex, Ey, Ez))
+            X = np.row_stack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5],
+                              Bx, By, Bz, Ex, Ey, Ez))
             Xt = np.transpose(X)
-            df = pd.DataFrame(Xt, columns=['x','y','z','px','py','pz',
+            df = pd.DataFrame(Xt, columns=[ 'x','y','z','px','py','pz',
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
-            if progress%4 <= dt/t_max*100:
-                df.to_csv(self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters*100) +'.csv')
+            if progress % (100 // n_files) <= dt / t_max * 100:
+                df.to_csv(self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters * 100) +'.csv')
             print( '\rz = %.2f m (%.1f %%) ' % (meters, progress), end='')
 
 Sim = Simulation

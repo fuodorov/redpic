@@ -41,25 +41,25 @@ class Beam:
 
         if distribution.name == 'Uniform' or distribution.name == 'KV':
             phi = np.random.uniform(0, 2*np.pi, int(self.n))
-            theta = np.random.uniform(0, np.pi, int(self.n))
-            x = distribution.x * np.sin(theta) * np.cos(phi)
-            y = distribution.y * np.sin(theta) * np.sin(phi)
-            px = distribution.px * np.sin(theta) * np.cos(phi)
-            py = distribution.py * np.sin(theta) * np.sin(phi)
+            x = distribution.x * np.sqrt(np.random.uniform(0, 1, int(self.n))) * np.cos(phi) + x_off
+            y = distribution.y * np.sqrt(np.random.uniform(0, 1, int(self.n))) * np.sin(phi) + y_off
+            px = distribution.px * np.sqrt(np.random.uniform(0, 1, int(self.n))) * np.cos(phi)
+            py = distribution.py * np.sqrt(np.random.uniform(0, 1, int(self.n))) * np.sin(phi)
         if distribution.name == 'Gauss' or distribution.name == 'GA':
             x = np.random.normal(x_off, distribution.x, int(self.n))
             y = np.random.normal(y_off, distribution.y, int(self.n))
             px = np.random.normal(0, distribution.px, int(self.n))
             py = np.random.normal(0, distribution.py, int(self.n))
 
-        z = np.random.uniform(-distribution.z, distribution.z, int(self.n)) / 2
+        z = np.random.uniform(-distribution.z+z_off, distribution.z+z_off, int(self.n)) / 2
         pz = np.random.normal(distribution.pz, distribution.pz * sig_pz, int(self.n))
 
         self.da = np.row_stack((x, y, z, px, py, pz))
         self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
         self.df.to_csv(self.type.symbol + 'Beam.csv')
 
-    def upload_particles(self, Y: np.array) -> None:
+    def upload_particles(self, x: np.array, y: np.array, z: np.array,
+                         px: np.array, py: np.array, pz: np.array) -> None:
         ''' Particle loading
 
         Y = np.array[[ ... ] # x[m]
@@ -70,7 +70,7 @@ class Beam:
                      [ ... ] # pz[MeV/c]
                      ]
         '''
-        self.da = Y
+        self.da = np.row_stack((x, y, z, px, py, pz))
         self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
         self.df.to_csv(self.type.symbol + 'Beam.csv')
 
