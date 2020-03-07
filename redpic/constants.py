@@ -13,6 +13,8 @@ __all__ = [ 'speed_of_light',
             'epsilon_0',
             'ep_0',
             'mu_0',
+            'ke',
+            'km',
             'h',
             'hbar',
             'elementary_charge',
@@ -47,6 +49,9 @@ ep_0 = epsilon_0 = constants.epsilon_0
 mu_0 = constants.mu_0
 h = constants.h
 hbar = constants.hbar
+
+ke = 1 / (4*np.pi*ep_0)
+km = mu_0 / (4*np.pi)
 
 e = elementary_charge = constants.e
 
