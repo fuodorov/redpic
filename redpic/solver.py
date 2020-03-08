@@ -86,7 +86,7 @@ def get_field_beam(beam: Beam, acc: Accelerator, type: str,
         return ke/(4*np.pi)*q*Ex/1e6, ke/(4*np.pi)*q*Ey/1e6, ke/(4*np.pi)*q*Ez/1e6
     if type == 'B':
         Bx, By, Bz = sum_field_particles(x, y, z, acc.z_start, acc.z_stop)
-        return mu_0/(4*np.pi)*q*Bx, -mu_0/(4*np.pi)*q*By, 0*mu_0/(4*np.pi)*q*Bz
+        return km/(4*np.pi)*q*Bx, -km/(4*np.pi)*q*By, 0*km/(4*np.pi)*q*Bz
 
 @jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
 def first_step_red(x: np.array, y: np.array, z: np.array,
