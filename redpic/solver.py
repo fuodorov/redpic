@@ -6,6 +6,7 @@ Relativictic Difference Scheme Particle-in-Cell code (REDPIC) solver file.
 import numpy as np
 import pandas as pd
 from numba import jit, prange
+from multiprocessing import Process
 from scipy import misc
 from .constants import *
 from .beam import *
@@ -37,9 +38,9 @@ def get_field_accelerator(acc: Accelerator, type: str,
         Ez = acc.Ez(z)
         dEzdz = acc.dEzdz(z)
         d2Ezdz2 = misc.derivative(acc.dEzdz, z, dx=dz, n=1)
-        Ez = Ez - d2Ezdz2*r_corr*r_corr/4 - d2Ezdz2*r_corr*r_corr/4           # row remainder
-        Ex = - dEzdz*x_corr/2 - dEzdz*x_corr/2 + Ez*offset_xp                # row remainder
-        Ey = - dEzdz*y_corr/2 - dEzdz*y_corr/2 + Ez*offset_yp                # row remainder
+        Ez = Ez - d2Ezdz2*r_corr*r_corr/2         # row remainder
+        Ex = - dEzdz*x_corr + Ez*offset_xp                # row remainder
+        Ey = - dEzdz*y_corr + Ez*offset_yp                # row remainder
         return Ex, Ey, Ez
     if type == 'B':
         Bx = acc.Bx(z)
@@ -48,11 +49,11 @@ def get_field_accelerator(acc: Accelerator, type: str,
         dBzdz = acc.dBzdz(z)
         d2Bzdz2 = misc.derivative(acc.dBzdz, z, dx=dz, n=1)
         Gz = acc.Gz(z)
-        Bz = Bz - d2Bzdz2*r_corr*r_corr/4 - d2Bzdz2*r_corr*r_corr/4                # row remainder
-        Bx = Bx + Gz*y_corr - dBzdz*x_corr/2 - dBzdz*x_corr/2 + Bz*offset_xp     # row remainder
-        By = By + Gz*x_corr - dBzdz*y_corr/2 - dBzdz*y_corr/2 + Bz*offset_yp     # row remainder
+        Bz = Bz - d2Bzdz2*r_corr*r_corr/2              # row remainder
+        Bx = Bx + Gz*y_corr - dBzdz*x_corr + Bz*offset_xp     # row remainder
+        By = By + Gz*x_corr - dBzdz*y_corr + Bz*offset_yp     # row remainder
         return Bx, By, Bz
-        
+
 @jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
 def sum_field_particles(x: np.array, y: np.array, z: np.array,
                         z_start: float, z_stop: float) -> (np.array, np.array, np.array):
@@ -73,29 +74,26 @@ def sum_field_particles(x: np.array, y: np.array, z: np.array,
     return Fx, Fy, Fz
 
 def get_field_beam(beam: Beam, acc: Accelerator, type: str,
-                   x: np.array, y: np.array, z: np.array) -> (np.array,
-                                                              np.array,
-                                                              np.array):
+                   x: np.array, y: np.array, z: np.array) -> (np.array, np.array, np.array):
     ''' Get an electric [MV/m] or magnetic [T] field space charge at a specific location in the accelerator
+
     '''
     assert type == 'E' or type == 'B', 'Check type field! (E or B)'
     Q = beam.charge
     q = beam.charge / beam.n
-    k_e = ke / 1e6 / 33.3564
-    k_m = km / 33.3564
     if type == 'E':
         Ex, Ey, Ez = sum_field_particles(x, y, z, acc.z_start, acc.z_stop)
-        return k_e*q*Ex, k_e*q*Ey, k_e*q*Ez
+        return ke/(4*np.pi)*q*Ex/1e6, ke/(4*np.pi)*q*Ey/1e6, ke/(4*np.pi)*q*Ez/1e6
     if type == 'B':
         Bx, By, Bz = sum_field_particles(x, y, z, acc.z_start, acc.z_stop)
-        return k_m*q*Bx, -k_m*q*By, 0*Bz
+        return mu_0/(4*np.pi)*q*Bx, -mu_0/(4*np.pi)*q*By, 0*mu_0/(4*np.pi)*q*Bz
 
 @jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
 def first_step_red(x: np.array, y: np.array, z: np.array,
                    px: np.array, py: np.array, pz: np.array,
                    Fx: np.array, Fy: np.array, Fz: np.array,
                    z_start: float, z_stop: float) -> (np.array, np.array, np.array,
-                                                       np.array, np.array, np.array):
+                                                      np.array, np.array, np.array):
     ''' First step for Relativictic Difference Scheme
 
     '''
@@ -105,7 +103,7 @@ def first_step_red(x: np.array, y: np.array, z: np.array,
             px[i] += 2*Fx[i]
             py[i] += 2*Fy[i]
             pz[i] += 2*Fz[i]
-            gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
+            gamma = (1 + px[i]**2 + py[i]**2 + pz[i]**2)**(1/2)
             vx = px[i]/gamma
             vy = py[i]/gamma
             vz = pz[i]/gamma
@@ -113,7 +111,7 @@ def first_step_red(x: np.array, y: np.array, z: np.array,
             y[i] += vy
             z[i] += vz
         else:
-            gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
+            gamma = (1 + px[i]**2 + py[i]**2 + pz[i]**2)**(1/2)
             vz = pz[i]/gamma
             z[i] += vz
     return x, y, z, px, py, pz
@@ -123,16 +121,18 @@ def second_step_red(x: np.array, y: np.array, z: np.array,
                     px: np.array, py: np.array, pz: np.array,
                     Fx: np.array, Fy: np.array, Fz: np.array,
                     z_start: float, z_stop: float) -> (np.array, np.array, np.array,
-                                                        np.array, np.array, np.array):
+                                                       np.array, np.array, np.array):
     ''' Second step for Relativictic Difference Scheme
 
     '''
     n = int(len(x))
-    for i in prange(int(n)):
+    for i in prange(n):
         if z[i] >= z_start and z[i] <= z_stop:
-            gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
-            vx, vy, vz = px[i]/gamma, py[i]/gamma, pz[i]/gamma
-            b2 = 1 + Fx[i]*Fx[i] + Fy[i]*Fy[i] + Fz[i]*Fz[i]
+            gamma = (1 + px[i]**2 + py[i]**2 + pz[i]**2)**(1/2)
+            vx = px[i]/gamma
+            vy = py[i]/gamma
+            vz = pz[i]/gamma
+            b2 = 1 + Fx[i]**2 + Fy[i]**2 + Fz[i]**2
             b1 = 2 - b2
             b3 = 2 * (vx*Fx[i] + vy*Fy[i] + vz*Fz[i])
             fx = 2 * (vy*Fz[i] - vz*Fy[i])
@@ -148,7 +148,7 @@ def second_step_red(x: np.array, y: np.array, z: np.array,
             py[i] = vy*gamma
             pz[i] = vz*gamma
         else:
-            gamma = np.sqrt(1 + px[i]*px[i] + py[i]*py[i] + pz[i]*pz[i])
+            gamma = (1 + px[i]**2 + py[i]**2 + pz[i]**2)**(1/2)
             vz = pz[i]/gamma
             z[i] += vz
     return x, y, z, px, py, pz
@@ -174,8 +174,8 @@ class Simulation:
         z_start = self.acc.z_start
         z_stop = self.acc.z_stop
         dz = self.acc.dz
-        dt = dz/c
-        t_max = (z_stop-z_start)/c + (max(Y[2])-min(Y[2]))/c
+        dt = dz / c
+        t_max = (z_stop-z_start) / c
 
         m = self.beam.type.mass
         q = self.beam.type.charge
@@ -247,7 +247,8 @@ class Simulation:
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
             file_name = self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters * 100) +'.csv'
             if progress % (100 // n_files) < 2*dt / t_max * 100:
-                df.to_csv(file_name)
+                writer = Process(target=df.to_csv, args=(file_name,), daemon=True)
+                writer.start()
             print( '\rz = %.2f m (%.1f %%) ' % (meters, progress), end='')
 
 Sim = Simulation
