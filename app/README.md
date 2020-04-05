@@ -1,6 +1,6 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 [![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
-## The RED-code
+## The RED-application
 <a href="https://fuodorov.github.io">V. Fedorov</a>
 
 Creating an interactive visualization application in Bokeh.
