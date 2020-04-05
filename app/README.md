@@ -1,4 +1,4 @@
-# Relativistic Difference Scheme Particles-In-Cell (REDPIC)
+# Relativistic Difference Scheme Application (REDAPP)
 [![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
 ## The RED-application
 <a href="https://fuodorov.github.io">V. Fedorov</a>
