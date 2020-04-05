@@ -1,6 +1,5 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 [![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/fuodorov/redpic/master)
 
 Let's consider the main examples of using the redpic. Examples are presented in notebooks.
 
