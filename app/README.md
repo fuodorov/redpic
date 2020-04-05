@@ -1,6 +1,6 @@
-# Relativistic Difference Scheme Application (REDAPP)
+# Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 [![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
-## The RED-application
+## The RED-Application (REDAPP)
 <a href="https://fuodorov.github.io">V. Fedorov</a>
 
 Creating an interactive visualization application in Bokeh.
