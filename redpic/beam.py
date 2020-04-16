@@ -18,7 +18,7 @@ def read_distribution_file(fname):
     cols = ['x', 'y', 'z', 'px', 'py', 'pz']
     #        m    m    m    MeV/c  MeV/c  MeV/c
 
-    df = pd.read_csv(fname, header=None, delim_whitespace=True, names=cols, dtype='float32')
+    df = pd.read_csv(fname, dtype='float32')
     return df['x'], df['y'], df['z'], df['px'], df['py'], df['pz']
 
 
@@ -61,7 +61,7 @@ class Beam:
         self.df = pd.DataFrame  # data frame
 
     def generate(self, distribution: Distribution, *, n: float,
-                 x_off: float=0.0, y_off: float=0.0, z_off: float=0.0, sig_pz: float=0.01) -> None:
+                 x_off: float=0.0, y_off: float=0.0, z_off: float=0.0, sig_pz: float=0.001, path: str='') -> None:
         '''Beam generator
 
         This function generates a beam with a given distribution and initial beam displacement.
@@ -76,11 +76,19 @@ class Beam:
         self.n = n
 
         if distribution.name == 'Uniform' or distribution.name == 'KV':
-            phi = np.random.uniform(0, 2*np.pi, int(self.n))
-            x = distribution.x * np.sqrt(np.random.uniform(0, 1, int(self.n))) * np.cos(phi) + x_off
-            y = distribution.y * np.sqrt(np.random.uniform(0, 1, int(self.n))) * np.sin(phi) + y_off
-            px = distribution.px * np.sqrt(np.random.uniform(0, 1, int(self.n))) * np.cos(phi)
-            py = distribution.py * np.sqrt(np.random.uniform(0, 1, int(self.n))) * np.sin(phi)
+            s = np.random.normal(0, distribution.x, int(self.n))
+            t = np.random.normal(0, distribution.y, int(self.n))
+            u = np.random.normal(0, distribution.x, int(self.n))
+            v = np.random.normal(0, distribution.y, int(self.n))
+            norm = (s*s + t*t + u*u + v*v)**0.5
+            (x,y) = (u+x_off, v+y_off) / norm
+
+            s = np.random.normal(0, distribution.px, int(self.n))
+            t = np.random.normal(0, distribution.py, int(self.n))
+            u = np.random.normal(0, distribution.px, int(self.n))
+            v = np.random.normal(0, distribution.py, int(self.n))
+            norm = (s*s + t*t + u*u + v*v)**0.5
+            (px,py) = (u,v) / norm
         if distribution.name == 'Gauss' or distribution.name == 'GA':
             x = np.random.normal(x_off, distribution.x, int(self.n))
             y = np.random.normal(y_off, distribution.y, int(self.n))
@@ -92,9 +100,9 @@ class Beam:
 
         self.da = np.row_stack((x, y, z, px, py, pz))
         self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
-        self.df.to_csv(self.type.symbol + 'Beam.csv')
+        self.df.to_csv(path + self.type.symbol + 'Beam.csv')
 
-    def upload(self, file_name: str):
+    def upload(self, file_name: str, *, path: str=''):
         ''' Particle loading
 
         '''
@@ -105,13 +113,13 @@ class Beam:
             self.n = int(len(x))
             self.da = np.row_stack((x, y, z, px, py, pz))
             self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
-            self.df.to_csv(self.type.symbol + 'Beam.csv')
+            self.df.to_csv(path + self.type.symbol + 'Beam.csv')
         if file_extension == 'csv':
             x, y, z, px, py, pz = read_distribution_file(file_name)
             self.n = int(len(x))
             self.da = np.row_stack((x, y, z, px, py, pz))
             self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
-            self.df.to_csv(self.type.symbol + 'Beam.csv')
+            self.df.to_csv(path + self.type.symbol + 'Beam.csv')
 
     def __str__(self):
         return str(self.df)

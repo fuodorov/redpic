@@ -161,7 +161,7 @@ class Simulation:
         self.beam = beam
         self.acc = accelerator
 
-    def track(self, *, n_files: int=20) -> None:
+    def track(self, *, n_files: int=20, path: str='') -> None:
         ''' Tracking!
 
         '''
@@ -245,7 +245,7 @@ class Simulation:
             Xt = np.transpose(X)
             df = pd.DataFrame(Xt, columns=[ 'x','y','z','px','py','pz',
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
-            file_name = self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters * 100) +'.csv'
+            file_name = path + self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters * 100) +'.csv'
             if progress % (100 // n_files) < 2*dt / t_max * 100:
                 writer = Process(target=df.to_csv, args=(file_name,), daemon=True)
                 writer.start()

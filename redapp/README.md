@@ -5,6 +5,14 @@
 
 Creating an interactive visualization application in Bokeh.
 
+![](static/screen.png)
+
+## Launch
+
+```
+bokeh serve --show redapp
+```
+
 ## Installation
 
 In order to quickly install all the required [Python](https://www.python.org/downloads/) libraries in the new environment, just download [requirements](https://github.com/fuodorov/redpic/blob/master/requirements.txt) and run the command on the command line:
