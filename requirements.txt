@@ -5,9 +5,7 @@ numba
 scipy
 periodictable
 pandas
-deap
 matplotlib
 bokeh
 holoviews
-PyQt5
 
