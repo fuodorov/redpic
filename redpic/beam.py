@@ -76,19 +76,13 @@ class Beam:
         self.n = n
 
         if distribution.name == 'Uniform' or distribution.name == 'KV':
-            s = np.random.normal(0, distribution.x, int(self.n))
-            t = np.random.normal(0, distribution.y, int(self.n))
-            u = np.random.normal(0, distribution.x, int(self.n))
-            v = np.random.normal(0, distribution.y, int(self.n))
+            s = np.random.normal(0, 1, int(self.n))
+            t = np.random.normal(0, 1, int(self.n))
+            u = np.random.normal(0, 1, int(self.n))
+            v = np.random.normal(0, 1, int(self.n))
             norm = (s*s + t*t + u*u + v*v)**0.5
-            (x,y) = (u+x_off, v+y_off) / norm
-
-            s = np.random.normal(0, distribution.px, int(self.n))
-            t = np.random.normal(0, distribution.py, int(self.n))
-            u = np.random.normal(0, distribution.px, int(self.n))
-            v = np.random.normal(0, distribution.py, int(self.n))
-            norm = (s*s + t*t + u*u + v*v)**0.5
-            (px,py) = (u,v) / norm
+            (x,y) = (distribution.x*u+x_off, distribution.y*v+y_off) / norm
+            (px,py) = (distribution.px*u, distribution.px*v) / norm
         if distribution.name == 'Gauss' or distribution.name == 'GA':
             x = np.random.normal(x_off, distribution.x, int(self.n))
             y = np.random.normal(y_off, distribution.y, int(self.n))
