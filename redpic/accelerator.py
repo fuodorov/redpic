@@ -421,17 +421,15 @@ class Accelerator:
         string = 'Accelerator structure.\n'
         string += '\tSolenoids:\n'
         for element in self.Bz_beamline.values():
-            string +="\t[ %.5f m, %.5f T, '%s', '%s', %.5f m, %.5f rad, %.5f m, %.5f rad],\n"\
-             % (element.z0, element.max_field, element.file_name, element.name,
-                element.x, element.xp, element.y, element.yp)
+            string +="\t[ %.5f m, %.5f T, '%s', '%s'],\n"\
+             % (element.z0, element.max_field, element.file_name, element.name)
         string += '\tAccelerating modules:\n'
         for element in self.Ez_beamline.values():
-            string +="\t[ %.5f m, %.5f T, '%s', '%s', %.5f m, %.5f rad, %.5f m, %.5f rad],\n"\
-             % (element.z0, element.max_field, element.file_name, element.name,
-                element.x, element.xp, element.y, element.yp)
+            string +="\t[ %.5f m, %.5f MV/m, '%s', '%s'],\n"\
+             % (element.z0, element.max_field, element.file_name, element.name)
         string += '\tQuadrupoles:\n'
         for element in self.Gz_beamline.values():
-            string +="\t[ %.5f m, %.5f T, '%s', '%s'],\n"\
+            string +="\t[ %.5f m, %.5f T/m, '%s', '%s'],\n"\
              % (element.z0, element.max_field, element.file_name, element.name)
         string += '\tCorrectors x:\n'
         for element in self.By_beamline.values():

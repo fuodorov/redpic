@@ -84,8 +84,8 @@ def beam_tab(beam):
         if species_button.active == 3:
             species = rp.antiproton
         beam.type = species
-        beam.charge = I/rp.c
-        beam.generate(distribution, n=N, path=dirname(__file__) + '/data/')
+        Q = np.sign(species.charge) * I * Z / rp.c
+        beam.generate(distribution, n=N, charge=Q, path=dirname(__file__) + '/data/')
         source.data = {'x': beam.df['x'], 'y': beam.df['y']}
         print(beam)
 
@@ -100,7 +100,7 @@ def beam_tab(beam):
         if species_button.active == 3:
             species = rp.antiproton
         beam.type = species
-        beam.charge = I/rp.c
+        beam.charge = np.sign(species.charge)* I * (beam.df['z'].max()-beam.df['z'].min()) / rp.c
         beam.upload(dirname(__file__) + '/data/' + file_input.filename,
                     path=dirname(__file__) + '/data/')
         source.data = {'x': beam.df['x'], 'y': beam.df['y']}

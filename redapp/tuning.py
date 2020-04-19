@@ -24,6 +24,7 @@ def tuning_tab(beam, acc):
 				    		 step=0.1, value=0.0,
 							 title='MaxField [MV/m]', format='0[.]0')
 
+    line_source = ColumnDataSource(data={'z': [0, 0], 'x': [-0.1, 0.1]})
     field_source = ColumnDataSource(data={'z': acc.z, 'Fz': acc.Ez(acc.z)})
     field_plot = figure(x_axis_label='z [m]', y_axis_label='Ez [MV/m]',
                         width=330, height=210)
@@ -38,6 +39,8 @@ def tuning_tab(beam, acc):
                         line_alpha=0.7, line_width=1)
     envelope_plot.line('z', '-x', source=envelope_source, line_color='#3A5785',
                         line_alpha=0.7, line_width=1)
+    envelope_plot.line('z', 'x', source=line_source, line_color='#3A5785',
+                        line_alpha=0.1, line_width=10)
 
     controls = row(column(pre, element_button, select, select_maxfield, tune_button),
                    field_plot)
@@ -94,10 +97,16 @@ def tuning_tab(beam, acc):
         if new != '':
             if element_button.active == 0:
                 select_maxfield.value = acc.Ez_beamline[new].max_field
+                line_source.data = {'z': [acc.Ez_beamline[new].z0, acc.Ez_beamline[new].z0],
+                                    'x': [-0.1, 0.1]}
             if element_button.active == 1:
                 select_maxfield.value = acc.Bz_beamline[new].max_field
+                line_source.data = {'z': [acc.Bz_beamline[new].z0, acc.Bz_beamline[new].z0],
+                                    'x': [-0.1, 0.1]}
             if element_button.active == 2:
                 select_maxfield.value = acc.Gz_beamline[new].max_field
+                line_source.data = {'z': [acc.Gz_beamline[new].z0, acc.Gz_beamline[new].z0],
+                                    'x': [-0.1, 0.1]}
 
     def tune_handler(new, beam=beam, acc=acc):
         if select.value != '':
@@ -113,15 +122,39 @@ def tuning_tab(beam, acc):
                 acc.Gz_beamline[select.value].max_field = select_maxfield.value
                 acc.compile()
                 field_source.data = {'z': acc.z, 'Fz': acc.Gz(acc.z)}
-        beam.df['pz2'] = beam.df['pz']*beam.df['pz']
-        kv_beam = kv.Beam(energy=(beam.df['pz2'].mean() +
-                          beam.type.mass**2*rp.c**4/rp.e**2/1e6**2)**0.5,
-                         current=beam.charge * rp.c,
-                         radius_x=beam.df['x'].max(),
-                         radius_y=beam.df['y'].max(),
-                         radius_xp=beam.df['px'].max() / beam.df['pz'].max(),
-                         radius_yp=beam.df['py'].max() / beam.df['pz'].max(),
-                         normalized_emittance=1000e-6)
+
+        beam.df['p2'] = beam.df['pz']*beam.df['pz'] + beam.df['px']*beam.df['px'] + beam.df['py']*beam.df['py']
+        E = beam.df['p2'].mean()**0.5 - beam.type.mass*rp.c**2/rp.e/1e6
+        I = np.sign(beam.type.charge) * beam.charge * rp.c / (beam.df['z'].max()-beam.df['z'].min())
+        X = beam.df['x'].max()
+        Y = beam.df['y'].max()
+        Xp = beam.df['px'].max() / beam.df['pz'].max()
+        Yp = beam.df['py'].max() / beam.df['pz'].max()
+        beta = beam.df['pz'].max() / (E + beam.type.mass*rp.c**2/rp.e/1e6)
+        gamma = 1/(1-beta**2)**0.5
+        df = beam.df
+        df['xp'] = df['px']/df['pz']
+        df['yp'] = df['py']/df['pz']
+        df['xp2'] = df['xp']*df['xp']
+        df['yp2'] = df['yp']*df['yp']
+        df['x xp'] = df['x']*df['xp']
+        df['y yp'] = df['y']*df['yp']
+        df['x2'] = df['x']*df['x']
+        df['y2'] = df['y']*df['y']
+        df['rms x'] = df['x2'].mean()**0.5
+        df['rms y'] = df['y2'].mean()**0.5
+        df['rms x Emittance'] = (df['x2'].mean()*df['xp2'].mean() - df['x xp'].mean()**2)**0.5
+        df['rms y Emittance'] = (df['y2'].mean()*df['yp2'].mean() - df['y yp'].mean()**2)**0.5
+        Emitt_x = df['rms x Emittance'].max()*gamma*beta
+        Emitt_y = df['rms y Emittance'].max()*gamma*beta
+        kv_beam = kv.Beam(energy=E,
+                         current=I,
+                         radius_x=X,
+                         radius_y=Y,
+                         radius_xp=Xp/2,
+                         radius_yp=Yp/2,
+                         normalized_emittance_x=Emitt_x,
+                         normalized_emittance_y=Emitt_y)
         kv_sim = kv.Simulation(kv_beam, acc)
         kv_sim.track()
         envelope_source.data = {'z': acc.z, 'x': kv_sim.envelope_x(acc.z),

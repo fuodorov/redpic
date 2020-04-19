@@ -53,14 +53,14 @@ class Beam:
 
     '''
 
-    def __init__(self, type: Element, *, charge: float=0.0) -> None:
+    def __init__(self, type: Element) -> None:
         self.type = type        # particles type
-        self.charge = charge    # beam charge
+        self.charge = 0.0    # beam charge
         self.n = 0.0            # quantity
         self.da = np.array      # data array
         self.df = pd.DataFrame  # data frame
 
-    def generate(self, distribution: Distribution, *, n: float,
+    def generate(self, distribution: Distribution, *, n: float, charge: float=0.0,
                  x_off: float=0.0, y_off: float=0.0, z_off: float=0.0, sig_pz: float=0.001, path: str='') -> None:
         '''Beam generator
 
@@ -74,6 +74,7 @@ class Beam:
         assert condition, 'Сheck distribution name!'
 
         self.n = n
+        self.charge = charge
 
         if distribution.name == 'Uniform' or distribution.name == 'KV':
             s = np.random.normal(0, 1, int(self.n))
@@ -82,7 +83,7 @@ class Beam:
             v = np.random.normal(0, 1, int(self.n))
             norm = (s*s + t*t + u*u + v*v)**0.5
             (x,y) = (distribution.x*u+x_off, distribution.y*v+y_off) / norm
-            (px,py) = (distribution.px*u, distribution.px*v) / norm
+            (px,py) = (distribution.px*u, distribution.py*v) / norm
         if distribution.name == 'Gauss' or distribution.name == 'GA':
             x = np.random.normal(x_off, distribution.x, int(self.n))
             y = np.random.normal(y_off, distribution.y, int(self.n))

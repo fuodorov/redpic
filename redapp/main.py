@@ -1,5 +1,6 @@
 # Library
 import redpic as rp
+import kenv as kv
 import numpy as np
 import pandas as pd
 import glob
@@ -16,6 +17,8 @@ from accelerator import accelerator_tab
 from tuning import tuning_tab
 from production import production_tab
 
+print(rp.__doc__)
+print('Version: ' + rp.__version__)
 # Initial parameters
 beam = rp.Beam(rp.electron)
 beam.generate(rp.Distribution('KV', x=1, y=1, z=1, px=1, py=1, pz=1), n=1)
