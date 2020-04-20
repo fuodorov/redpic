@@ -151,10 +151,11 @@ def tuning_tab(beam, acc):
                          current=I,
                          radius_x=X,
                          radius_y=Y,
-                         radius_xp=Xp/2,
-                         radius_yp=Yp/2,
+                         radius_xp=Xp,
+                         radius_yp=Yp,
                          normalized_emittance_x=Emitt_x,
-                         normalized_emittance_y=Emitt_y)
+                         normalized_emittance_y=Emitt_y,
+                         charge=np.sign(beam.type.charge))
         kv_sim = kv.Simulation(kv_beam, acc)
         kv_sim.track()
         envelope_source.data = {'z': acc.z, 'x': kv_sim.envelope_x(acc.z),
