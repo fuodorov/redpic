@@ -26,16 +26,21 @@ def beam_tab(beam):
                             step=100, value=0,
                             title='Curent [A]')
     # Phase ellipse
-    x_input = TextInput(value="0", title="X [m]:", width=100)
-    y_input = TextInput(value="0", title="Y [m]:", width=100)
-    z_input = TextInput(value="0", title="Z [m]:", width=100)
+    x_input = TextInput(value="0", title="X [m]:", width=75)
+    y_input = TextInput(value="0", title="Y [m]:", width=75)
+    z_input = TextInput(value="0", title="Z [m]:", width=75)
 
-    px_input = TextInput(value="0", title="Px [MeV/c]:", width=100)
-    py_input = TextInput(value="0", title="Py [MeV/c]:", width=100)
-    pz_input = TextInput(value="0", title="Pz [MeV/c]:", width=100)
+    px_input = TextInput(value="0", title="Px [MeV/c]:", width=75)
+    py_input = TextInput(value="0", title="Py [MeV/c]:", width=75)
+    pz_input = TextInput(value="0", title="Pz [MeV/c]:", width=75)
 
-    phase_ell = column(row(x_input, y_input, z_input),
-                       row(px_input, py_input, pz_input))
+    x_off_input = TextInput(value="0", title="X_off [m]:", width=75)
+    y_off_input = TextInput(value="0", title="Y_off [m]:", width=75)
+    px_off_input = TextInput(value="0", title="Px_off:", width=60)
+    py_off_input = TextInput(value="0", title="Py_off:", width=60)
+
+    phase_ell = column(row(x_input, y_input, z_input, x_off_input),
+                       row(px_input, py_input, pz_input, y_off_input))
 
     select_distribution = RadioButtonGroup(labels=['Uniform', 'Gauss'],
                                            active=0)
@@ -69,6 +74,10 @@ def beam_tab(beam):
         Px = float(px_input.value)
         Py = float(py_input.value)
         Pz = float(pz_input.value)
+        X_off = float(x_off_input.value)
+        Y_off = float(y_off_input.value)
+        Px_off = float(px_off_input.value)
+        Py_off = float(py_off_input.value)
         if select_distribution.active == 0:
             distribution = rp.Distribution(name='KV', x=X, y=Y, z=Z,
                                            px=Px, py=Py, pz=Pz)
@@ -85,7 +94,8 @@ def beam_tab(beam):
             species = rp.antiproton
         beam.type = species
         Q = np.sign(species.charge) * I * Z / rp.c
-        beam.generate(distribution, n=N, charge=Q, path=dirname(__file__) + '/data/')
+        beam.generate(distribution, n=N, charge=Q, path=dirname(__file__) + '/data/',
+                      x_off=X_off, y_off=Y_off, px_off=Px_off, py_off=Py_off)
         source.data = {'x': beam.df['x'], 'y': beam.df['y']}
         print(beam)
 
@@ -100,8 +110,8 @@ def beam_tab(beam):
         if species_button.active == 3:
             species = rp.antiproton
         beam.type = species
-        beam.charge = np.sign(species.charge)* I * (beam.df['z'].max()-beam.df['z'].min()) / rp.c
-        beam.upload(dirname(__file__) + '/data/' + file_input.filename,
+        Q = np.sign(species.charge)* I * (beam.df['z'].max()-beam.df['z'].min()) / rp.c
+        beam.upload(dirname(__file__) + '/data/' + file_input.filename, charge=Q,
                     path=dirname(__file__) + '/data/')
         source.data = {'x': beam.df['x'], 'y': beam.df['y']}
         x_input.value = str(np.around(beam.df['x'].max(), 3))

@@ -61,7 +61,9 @@ class Beam:
         self.df = pd.DataFrame  # data frame
 
     def generate(self, distribution: Distribution, *, n: float, charge: float=0.0,
-                 x_off: float=0.0, y_off: float=0.0, z_off: float=0.0, sig_pz: float=0.001, path: str='') -> None:
+                 x_off: float=0.0, y_off: float=0.0, z_off: float=0.0,
+                 px_off: float=0.0, py_off: float=0.0, sig_pz: float=0.001,
+                 path: str='') -> None:
         '''Beam generator
 
         This function generates a beam with a given distribution and initial beam displacement.
@@ -82,13 +84,13 @@ class Beam:
             u = np.random.normal(0, 1, int(self.n))
             v = np.random.normal(0, 1, int(self.n))
             norm = (s*s + t*t + u*u + v*v)**0.5
-            (x,y) = (distribution.x*u+x_off, distribution.y*v+y_off) / norm
-            (px,py) = (distribution.px*u, distribution.py*v) / norm
+            (x,y) = (distribution.x*u/norm+x_off, distribution.y*v/norm+y_off)
+            (px,py) = (distribution.px*u/norm+px_off, distribution.py*v/norm+py_off)
         if distribution.name == 'Gauss' or distribution.name == 'GA':
             x = np.random.normal(x_off, distribution.x, int(self.n))
             y = np.random.normal(y_off, distribution.y, int(self.n))
-            px = np.random.normal(0, distribution.px, int(self.n))
-            py = np.random.normal(0, distribution.py, int(self.n))
+            px = np.random.normal(px_off, distribution.px, int(self.n))
+            py = np.random.normal(py_off, distribution.py, int(self.n))
 
         z = np.random.uniform(-distribution.z+z_off, distribution.z+z_off, int(self.n)) / 2
         pz = np.random.normal(distribution.pz, distribution.pz * sig_pz, int(self.n))
@@ -97,11 +99,12 @@ class Beam:
         self.df = pd.DataFrame(np.transpose(self.da), columns=['x','y','z','px','py','pz'])
         self.df.to_csv(path + self.type.symbol + 'Beam.csv')
 
-    def upload(self, file_name: str, *, path: str=''):
+    def upload(self, file_name: str, *, charge: float=0.0, path: str=''):
         ''' Particle loading
 
         '''
         file_extension = file_name.split('.')[-1]
+        self.charge = charge
 
         if file_extension == 'ini':
             x, y, z, px, py, pz = read_distribution_astra(file_name)

@@ -14,7 +14,7 @@ from bokeh.models.widgets import Slider, Tabs
 from bokeh.models.ranges import Range1d
 from os.path import dirname, join
 
-def window_rms(a: np.array, window_size: int=100):
+def window_rms(a: np.array, window_size: int=1_000):
     '''windows RMS calculation
 
     '''
@@ -22,7 +22,7 @@ def window_rms(a: np.array, window_size: int=100):
     window = np.ones(int(window_size)) / float(window_size)
     return np.sqrt(np.convolve(a2, window, 'same'))
 
-def window_mean(a: np.array, window_size: int=100):
+def window_mean(a: np.array, window_size: int=1_000):
     '''windows MEAN calculation
 
     '''
@@ -49,8 +49,8 @@ def production_tab(beam, acc):
     field_button = RadioButtonGroup(
         labels=['z-Ez', 'z-Ex', 'z-Ey', 'z-Bz', 'z-Bx', 'z-By'], active=0)
     line_button = RadioButtonGroup(
-        labels=['rms x', 'rms y', 'rms x Emitt', 'rms y Emitt', 'rms Energy',
-                'x β-func', 'y β-func'], active=0)
+        labels=['rms x', 'rms y', 'rms x Emitt', 'rms y Emitt', 'avg Energy',
+                'x β-func', 'y β-func', 'avg x', 'avg y'], active=0)
 
     file_input = FileInput(accept='.csv')
 
@@ -82,6 +82,32 @@ def production_tab(beam, acc):
     tabs = Tabs(tabs=[phase_tab, line_tab, field_tab])
     tab = Panel(child=column(controls, tabs, buttons), title='Production')
 
+    def calculate(df):
+        df = df.sort_values('z')
+        df['avg p'] = window_mean((df['px']*df['px'] + df['py']*df['py'] + df['pz']*df['pz'])**0.5)
+        df['xp'] = df['px']/df['pz']
+        df['yp'] = df['py']/df['pz']
+        df['x xp'] = window_mean(df['x']*df['xp'])
+        df['y yp'] = window_mean(df['y']*df['yp'])
+        df['rms x'] = window_rms(df['x'])
+        df['rms y'] = window_rms(df['y'])
+        df['rms xp'] = window_rms(df['xp'])
+        df['rms yp'] = window_rms(df['yp'])
+        df['rms x Emittance'] = (df['rms x']**2 * df['rms xp']**2 - df['x xp']**2)**0.5
+        df['rms y Emittance'] = (df['rms y']**2 * df['rms yp']**2 - df['y yp']**2)**0.5
+        df['avg Energy'] = df['avg p'] - beam.type.mass*rp.c**2/rp.e/1e6
+        df['x β-function'] = df['rms x']**2/df['rms x Emittance']
+        df['y β-function'] = df['rms y']**2/df['rms y Emittance']
+        df['centroid x'] = window_mean(df['x'])
+        df['centroid y'] = window_mean(df['y'])
+        df['avg Ez'] = window_mean(df['Ez'])
+        df['avg Ex'] = window_mean(df['Ex'])
+        df['avg Ey'] = window_mean(df['Ey'])
+        df['avg Bz'] = window_mean(df['Bz'])
+        df['avg Bx'] = window_mean(df['Bx'])
+        df['avg By'] = window_mean(df['By'])
+        return df
+
     def track_handler(new, beam=beam, acc=acc):
         simulation = rp.Simulation(beam, acc)
         simulation.track(n_files=30, path=dirname(__file__) + '/data/')
@@ -89,9 +115,9 @@ def production_tab(beam, acc):
     def refresh_handler(beam=beam, acc=acc):
         fname = dirname(__file__) + '/data/' + file_input.filename
         df = pd.read_csv(fname, dtype='float32')
+        df = calculate(df)
         df = df[df.z >= acc.z_start]
-        df = df.sort_values('z')
-        #df = df[df.z <= acc.z_stop]
+        df = df[df.z <= acc.z_stop]
         if tabs.active == 0:
             if phase_button.active == 0:
                 phase_plot.xaxis.axis_label = 'z [m]'
@@ -126,24 +152,9 @@ def production_tab(beam, acc):
                 phase_plot.yaxis.axis_label = 'py [MeV/c]'
                 phase_source.data = {'x': df['px'], 'y': df['py']}
         if tabs.active == 1:
-            df['p'] = window_rms(df['px']*df['px'] + df['py']*df['py'] + df['pz']*df['pz'])
-            df['xp'] = df['px']/df['pz']
-            df['yp'] = df['py']/df['pz']
-            df['x xp'] = window_mean(df['x']*df['xp'])
-            df['y yp'] = window_mean(df['y']*df['yp'])
-            df['rms x'] = window_rms(df['x'])
-            df['rms y'] = window_rms(df['y'])
-            df['rms xp'] = window_rms(df['xp'])
-            df['rms yp'] = window_rms(df['yp'])
-            df['rms x Emittance'] = (df['rms x']**2 * df['rms xp']**2 - df['x xp']**2)**0.5
-            df['rms y Emittance'] = (df['rms y']**2 * df['rms yp']**2 - df['y yp']**2)**0.5
-            df['rms Energy'] = df['p'] - beam.type.mass*rp.c**2/rp.e/1e6
-            df['x β-function'] = df['rms x']**2/df['rms x Emittance']
-            df['y β-function'] = df['rms y']**2/df['rms y Emittance']
             if line_button.active == 0:
                 line_plot.xaxis.axis_label = 'z [m]'
                 line_plot.yaxis.axis_label = 'rms x [m]'
-                df['rms x'] = window_rms(df['x'])
                 line_source.data = {'x': df['z'], 'y': df['rms x']}
             if line_button.active == 1:
                 line_plot.xaxis.axis_label = 'z [m]'
@@ -159,8 +170,8 @@ def production_tab(beam, acc):
                 line_source.data = {'x': df['z'], 'y': df['rms y Emittance']}
             if line_button.active == 4:
                 line_plot.xaxis.axis_label = 'z [m]'
-                line_plot.yaxis.axis_label = 'rms Energy [MeV]'
-                line_source.data = {'x': df['z'], 'y': df['rms Energy']}
+                line_plot.yaxis.axis_label = 'avg Energy [MeV]'
+                line_source.data = {'x': df['z'], 'y': df['avg Energy']}
             if line_button.active == 5:
                 line_plot.xaxis.axis_label = 'z [m]'
                 line_plot.yaxis.axis_label = 'x β-function [m]'
@@ -169,13 +180,15 @@ def production_tab(beam, acc):
                 line_plot.xaxis.axis_label = 'z [m]'
                 line_plot.yaxis.axis_label = 'y β-function [m]'
                 line_source.data = {'x': df['z'], 'y': df['y β-function']}
+            if line_button.active == 7:
+                line_plot.xaxis.axis_label = 'z [m]'
+                line_plot.yaxis.axis_label = 'Centroid x [m]'
+                line_source.data = {'x': df['z'], 'y': df['centroid x']}
+            if line_button.active == 8:
+                line_plot.xaxis.axis_label = 'z [m]'
+                line_plot.yaxis.axis_label = 'Centroid y [m]'
+                line_source.data = {'x': df['z'], 'y': df['centroid y']}
         if tabs.active == 2:
-            df['avg Ez'] = window_mean(df['Ez'])
-            df['avg Ex'] = window_mean(df['Ex'])
-            df['avg Ey'] = window_mean(df['Ey'])
-            df['avg Bz'] = window_mean(df['Bz'])
-            df['avg Bx'] = window_mean(df['Bx'])
-            df['avg By'] = window_mean(df['By'])
             if field_button.active == 0:
                 field_plot.xaxis.axis_label = 'z [m]'
                 field_plot.yaxis.axis_label = 'Ez [MV/m]'

@@ -175,7 +175,8 @@ class Simulation:
         z_stop = self.acc.z_stop
         dz = self.acc.dz
         dt = dz / c
-        t_max = (z_stop-z_start) / c
+        len_beam = max(Y[2]) - min(Y[2])
+        t_max = (z_stop - z_start) / c
 
         m = self.beam.type.mass
         q = self.beam.type.charge

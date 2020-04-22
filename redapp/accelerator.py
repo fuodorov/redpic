@@ -90,5 +90,5 @@ def accelerator_tab(acc):
 
     compile_button.on_click(compile_handler)
     element_button.on_click(element_handler)
-    
+
     return tab

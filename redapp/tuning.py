@@ -35,12 +35,15 @@ def tuning_tab(beam, acc):
                         width=650, height=250)
     envelope_source = ColumnDataSource(data={'z': acc.z, 'x': 0*acc.z,
                                              '-x': 0*acc.z})
+    centroid_source = ColumnDataSource(data={'z': acc.z, 'x': 0*acc.z})
     envelope_plot.line('z', 'x', source=envelope_source, line_color='#3A5785',
                         line_alpha=0.7, line_width=1)
     envelope_plot.line('z', '-x', source=envelope_source, line_color='#3A5785',
                         line_alpha=0.7, line_width=1)
     envelope_plot.line('z', 'x', source=line_source, line_color='#3A5785',
                         line_alpha=0.1, line_width=10)
+    envelope_plot.line('z', 'x', source=centroid_source, line_color='#3A5785',
+                        line_alpha=0.7, line_width=1, line_dash=[3,5])
 
     controls = row(column(pre, element_button, select, select_maxfield, tune_button),
                    field_plot)
@@ -130,6 +133,10 @@ def tuning_tab(beam, acc):
         Y = beam.df['y'].max()
         Xp = beam.df['px'].max() / beam.df['pz'].max()
         Yp = beam.df['py'].max() / beam.df['pz'].max()
+        X_off = beam.df['x'].mean()
+        Y_off = beam.df['x'].mean()
+        Xp_off = beam.df['px'].mean() / beam.df['pz'].max()
+        Yp_off = beam.df['py'].mean() / beam.df['pz'].max()
         beta = beam.df['pz'].max() / (E + beam.type.mass*rp.c**2/rp.e/1e6)
         gamma = 1/(1-beta**2)**0.5
         df = beam.df
@@ -155,11 +162,14 @@ def tuning_tab(beam, acc):
                          radius_yp=Yp,
                          normalized_emittance_x=Emitt_x,
                          normalized_emittance_y=Emitt_y,
+                         x=X_off, y=Y_off,
+                         xp=Xp_off, yp=Yp_off,
                          charge=np.sign(beam.type.charge))
         kv_sim = kv.Simulation(kv_beam, acc)
         kv_sim.track()
         envelope_source.data = {'z': acc.z, 'x': kv_sim.envelope_x(acc.z),
                                 '-x': -kv_sim.envelope_x(acc.z)}
+        centroid_source.data = {'z': acc.z, 'x': kv_sim.centroid_x(acc.z)}
 
     element_button.on_click(element_handler)
     select.on_change('value', update_select_maxfield)
