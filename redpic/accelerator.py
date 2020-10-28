@@ -82,7 +82,7 @@ def read_fields(beamline: dict,
             M = field_files[element.file_name]
             z_data = M[:,0] + element.z0
             F_data = M[:,1]
-            dz = 2*(z_data[-1] - z_data[0])/len(z_data)
+            dz = (z_data[-1] - z_data[0])/len(z_data)
 
             f = interpolate.interp1d(
                 z_data, element.max_field*F_data, kind='cubic',

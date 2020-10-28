@@ -38,9 +38,9 @@ def get_field_accelerator(acc: Accelerator, type: str,
         Ez = acc.Ez(z)
         dEzdz = acc.dEzdz(z)
         d2Ezdz2 = misc.derivative(acc.dEzdz, z, dx=dz, n=1)
-        Ez = Ez - d2Ezdz2*r_corr*r_corr/2         # row remainder
-        Ex = - dEzdz*x_corr + Ez*offset_xp                # row remainder
-        Ey = - dEzdz*y_corr + Ez*offset_yp                # row remainder
+        Ez = Ez - d2Ezdz2*r_corr*r_corr/4         # row remainder
+        Ex = - dEzdz*x_corr/2 + Ez*offset_xp                # row remainder
+        Ey = - dEzdz*y_corr/2 + Ez*offset_yp                # row remainder
         return Ex, Ey, Ez
     if type == 'B':
         Bx = acc.Bx(z)
@@ -49,9 +49,9 @@ def get_field_accelerator(acc: Accelerator, type: str,
         dBzdz = acc.dBzdz(z)
         d2Bzdz2 = misc.derivative(acc.dBzdz, z, dx=dz, n=1)
         Gz = acc.Gz(z)
-        Bz = Bz - d2Bzdz2*r_corr*r_corr/2              # row remainder
-        Bx = Bx + Gz*y_corr - dBzdz*x_corr + Bz*offset_xp     # row remainder
-        By = By + Gz*x_corr - dBzdz*y_corr + Bz*offset_yp     # row remainder
+        Bz = Bz - d2Bzdz2*r_corr*r_corr/4              # row remainder
+        Bx = Bx + Gz*y_corr - dBzdz*x_corr/2 + Bz*offset_xp     # row remainder
+        By = By + Gz*x_corr - dBzdz*y_corr/2 + Bz*offset_yp     # row remainder
         return Bx, By, Bz
 
 @jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
