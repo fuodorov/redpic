@@ -94,9 +94,9 @@ class Beam(kv.Beam):
 		self.radius_z = radius_z
 		self.normalized_emittance_z = normalized_emittance_z
 		self.z = z
-		self.total_charge = type.charge/abs(type.charge)*self.current*self.radius_z / c / self.beta          # beam charge
+		self.total_charge = 2*type.charge/abs(type.charge)*self.current*self.radius_z / c / self.beta          # beam charge
 
-	def generate(self, distribution: str='KV', n: int=0, *, dpz: float=0.05 ):
+	def generate(self, distribution: str='KV', n: int=0, *, dpz: float=0.01):
 		 """Beam generator
 
 		 This function generates a beam with a given distribution and initial beam displacement.
@@ -105,8 +105,17 @@ class Beam(kv.Beam):
 
 		 self.distribution = distribution
 		 self.n = n
-
-		 if distribution == 'Uniform' or distribution == 'KV':
+		 if distribution == 'Gauss':
+			 s = np.random.normal(0, 1, int(self.n))
+			 t = np.random.normal(0, 1, int(self.n))
+			 u = np.random.normal(0, 1, int(self.n))
+			 v = np.random.normal(0, 1, int(self.n))
+			 (x,y) = (self.radius_x*s, self.radius_y*t)
+			 u = 2*(self.px*self.normalized_emittance_x*u + self.radius_xp*x)/self.radius_x
+			 v = 2*(self.py*self.normalized_emittance_y*v + self.radius_yp*y)/self.radius_y
+			 (x,y) = (x + self.x, y + self.y)
+			 (px, py) = (u + self.p*self.xp, v + self.p*self.yp)
+		 elif distribution == 'KV':
 			 s = np.random.normal(0, 1, int(self.n))
 			 t = np.random.normal(0, 1, int(self.n))
 			 u = np.random.normal(0, 1, int(self.n))
@@ -114,12 +123,10 @@ class Beam(kv.Beam):
 			 norm = (s*s + t*t + u*u + v*v)**0.5
 			 (s,t,u,v) = (s,t,u,v)/norm
 			 (x,y) = (self.radius_x*s, self.radius_y*t)
-			 u = (self.normalized_emittance_x*u + self.radius_xp*x)/self.radius_x
-			 v = (self.normalized_emittance_y*v + self.radius_yp*y)/self.radius_y
+			 u = 2*(self.px*self.normalized_emittance_x*u + self.radius_xp*x)/self.radius_x
+			 v = 2*(self.py*self.normalized_emittance_y*v + self.radius_yp*y)/self.radius_y
 			 (x,y) = (x + self.x, y + self.y)
-			 (px, py) = (self.px*u + self.p*self.xp, -self.py*v + self.p*self.yp)
-			 #(x,y) = (self.radius_x*s/norm+self.x, self.radius_y*t/norm+self.y)
-			 #(px,py) = (self.px*u/norm+self.p*self.xp, self.py*v/norm+self.p*self.yp)
+			 (px, py) = (u + self.p*self.xp, v + self.p*self.yp)
 
 		 z = np.random.uniform(-self.radius_z+self.z, self.radius_z+self.z, int(self.n))
 		 pz = np.random.uniform((1-dpz)*self.pz, (1+dpz)*self.pz, int(self.n))
