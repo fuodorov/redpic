@@ -1,7 +1,7 @@
-'''
+"""
 Relativictic Difference Scheme Particle-in-Cell code (REDPIC) constants file.
 
-'''
+"""
 
 import periodictable
 import numpy as np

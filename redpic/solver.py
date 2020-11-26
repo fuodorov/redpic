@@ -1,7 +1,7 @@
-'''
+"""
 Relativictic Difference Scheme Particle-in-Cell code (REDPIC) solver file.
 
-'''
+"""
 
 import numpy as np
 import pandas as pd
@@ -13,16 +13,15 @@ from .beam import *
 from .accelerator import *
 
 __all__ = [ 'Simulation',
-            'Sim'
-             ]
+            'Sim']
 
 def get_field_accelerator(acc: Accelerator, type: str,
                           x: np.array, y: np.array, z: np.array) -> (np.array,
                                                                      np.array,
                                                                      np.array):
-    ''' Get an electric or magnetic field at a specific location in the accelerator
+    """ Get an electric or magnetic field at a specific location in the accelerator
 
-    '''
+    """
     assert type == 'E' or type == 'B', 'Check type field! (E or B)'
 
     dz = acc.dz
@@ -57,9 +56,9 @@ def get_field_accelerator(acc: Accelerator, type: str,
 @jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
 def sum_field_particles(x: np.array, y: np.array, z: np.array,
                         z_start: float, z_stop: float) -> (np.array, np.array, np.array):
-    ''' Sum particles fields
+    """ Sum particles fields
 
-    '''
+    """
     n = int(len(x))
     Fx = np.zeros(n)
     Fy = np.zeros(n)
@@ -75,12 +74,12 @@ def sum_field_particles(x: np.array, y: np.array, z: np.array,
 
 def get_field_beam(beam: Beam, acc: Accelerator, type: str,
                    x: np.array, y: np.array, z: np.array) -> (np.array, np.array, np.array):
-    ''' Get an electric [MV/m] or magnetic [T] field space charge at a specific location in the accelerator
+    """ Get an electric [MV/m] or magnetic [T] field space charge at a specific location in the accelerator
 
-    '''
+    """
     assert type == 'E' or type == 'B', 'Check type field! (E or B)'
-    Q = beam.charge
-    q = beam.charge / beam.n
+    Q = beam.total_charge
+    q = Q / beam.n
     if type == 'E':
         Ex, Ey, Ez = sum_field_particles(x, y, z, acc.z_start, acc.z_stop)
         return ke/(4*np.pi)*q*Ex/1e6, ke/(4*np.pi)*q*Ey/1e6, ke/(4*np.pi)*q*Ez/1e6
@@ -94,9 +93,9 @@ def first_step_red(x: np.array, y: np.array, z: np.array,
                    Fx: np.array, Fy: np.array, Fz: np.array,
                    z_start: float, z_stop: float) -> (np.array, np.array, np.array,
                                                       np.array, np.array, np.array):
-    ''' First step for Relativictic Difference Scheme
+    """ First step for Relativictic Difference Scheme
 
-    '''
+    """
     n = int(len(x))
     for i in prange(n):
         if z[i] >= z_start and z[i] <= z_stop:
@@ -122,9 +121,9 @@ def second_step_red(x: np.array, y: np.array, z: np.array,
                     Fx: np.array, Fy: np.array, Fz: np.array,
                     z_start: float, z_stop: float) -> (np.array, np.array, np.array,
                                                        np.array, np.array, np.array):
-    ''' Second step for Relativictic Difference Scheme
+    """ Second step for Relativictic Difference Scheme
 
-    '''
+    """
     n = int(len(x))
     for i in prange(n):
         if z[i] >= z_start and z[i] <= z_stop:
@@ -154,17 +153,18 @@ def second_step_red(x: np.array, y: np.array, z: np.array,
     return x, y, z, px, py, pz
 
 class Simulation:
-    ''' Simulation of the beam tracking in the accelerator
+    """ Simulation of the beam tracking in the accelerator
 
-    '''
+    """
     def __init__(self, beam, accelerator):
         self.beam = beam
         self.acc = accelerator
+        self.result = {}
 
-    def track(self, *, n_files: int=20, path: str='') -> None:
-        ''' Tracking!
+    def track(self, *, n_files: int=20) -> None:
+        """ Tracking!
 
-        '''
+        """
         assert n_files > 0, 'The number of files (n_files) must be a positive number!'
 
         # Init parameterss
@@ -198,7 +198,7 @@ class Simulation:
             Ex, Ey, Ez = Ex/E0, Ey/E0, Ez/E0
 
             # get electric field from beam
-            if self.beam.charge:
+            if self.beam.total_charge:
                 ex, ey, ez = get_field_beam(self.beam, self.acc, 'E',
                                             Y[0]*dz, Y[1]*dz, Y[2]*dz)
                 ex, ey, ez = ex/E0, ey/E0, ez/E0
@@ -218,7 +218,7 @@ class Simulation:
             Bx, By, Bz = Bx/B0/gamma, By/B0/gamma, Bz/B0/gamma
 
             # get magnetic field from beam
-            if self.beam.charge:
+            if self.beam.total_charge:
                 bx, by, bz = get_field_beam(self.beam, self.acc, 'B',
                                             Y[0]*dz, Y[1]*dz, Y[2]*dz)
                 bx, by, bz = bx*vz/B0, by*vz/B0, bz*vz/B0
@@ -238,7 +238,6 @@ class Simulation:
             Bx, By, Bz = Bx*gamma*B0, By*gamma*B0, Bz*gamma*B0
             Ex, Ey, Ez = Ex*E0, Ey*E0, Ez*E0
 
-            # output in files (symbolBeam.XXXX.csv)
             progress = t / t_max * 100
             meters = z_start + t * c
             X = np.row_stack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5],
@@ -246,10 +245,8 @@ class Simulation:
             Xt = np.transpose(X)
             df = pd.DataFrame(Xt, columns=[ 'x','y','z','px','py','pz',
                              'Bx', 'By', 'Bz', 'Ex', 'Ey', 'Ez' ])
-            file_name = path + self.beam.type.symbol + 'Beam.'+ '%04.0f' % (meters * 100) +'.csv'
             if progress % (100 // n_files) < 2*dt / t_max * 100:
-                writer = Process(target=df.to_csv, args=(file_name,), daemon=True)
-                writer.start()
+                self.result.update({round(meters, 3): df})
             print( '\rz = %.2f m (%.1f %%) ' % (meters, progress), end='')
 
 Sim = Simulation
