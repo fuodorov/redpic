@@ -9,7 +9,7 @@ import kenv as kv
 from collections import namedtuple
 from .constants import *
 
-__all__ = [ 'Beam' ]
+__all__ = [ 'Beam', 'read_distribution_astra', 'read_distribution_file' ]
 
 def read_distribution_file(fname):
 	""" Read distribution from file .csv
@@ -65,7 +65,6 @@ class Beam(kv.Beam):
 				 normalized_emittance: float=.0e0,
 				 normalized_emittance_x: float=.0e0,
 				 normalized_emittance_y: float=.0e0,
-				 normalized_emittance_z: float=.0e0,
 				 x: float=.0e0,
 				 y: float=.0e0,
 				 z: float=.0e0,
@@ -92,7 +91,6 @@ class Beam(kv.Beam):
 		self.df = pd.DataFrame      # data frame
 		self.da = np.array
 		self.radius_z = radius_z
-		self.normalized_emittance_z = normalized_emittance_z
 		self.z = z
 		self.total_charge = 2*type.charge/abs(type.charge)*self.current*self.radius_z / c / self.beta          # beam charge
 
@@ -105,17 +103,7 @@ class Beam(kv.Beam):
 
 		 self.distribution = distribution
 		 self.n = n
-		 if distribution == 'Gauss':
-			 s = np.random.normal(0, 1, int(self.n))
-			 t = np.random.normal(0, 1, int(self.n))
-			 u = np.random.normal(0, 1, int(self.n))
-			 v = np.random.normal(0, 1, int(self.n))
-			 (x,y) = (self.radius_x*s, self.radius_y*t)
-			 u = 2*(self.px*self.normalized_emittance_x*u + self.radius_xp*x)/self.radius_x
-			 v = 2*(self.py*self.normalized_emittance_y*v + self.radius_yp*y)/self.radius_y
-			 (x,y) = (x + self.x, y + self.y)
-			 (px, py) = (u + self.p*self.xp, v + self.p*self.yp)
-		 elif distribution == 'KV':
+		 if distribution == 'KV':
 			 s = np.random.normal(0, 1, int(self.n))
 			 t = np.random.normal(0, 1, int(self.n))
 			 u = np.random.normal(0, 1, int(self.n))
@@ -173,7 +161,5 @@ class Beam(kv.Beam):
 				+'\tNormalized emittance x\t%0.1f mm*mrad'%\
 				(self.normalized_emittance_x*1e6) + '\n' \
 				+'\tNormalized emittance y\t%0.1f mm*mrad'%\
-				(self.normalized_emittance_y*1e6) + '\n' \
-				+'\tNormalized emittance z\t%0.1f mm*mrad'%\
-				(self.normalized_emittance_z*1e6) + '\n'
+				(self.normalized_emittance_y*1e6) + '\n'
 		return self.description
