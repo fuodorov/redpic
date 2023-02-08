@@ -1,5 +1,8 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 [![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
+
+Further development will take place in the [binp-dev/redpic](https://github.com/binp-dev/redpic) repository.
+
 ## The RED-code
 <a href="https://fuodorov.github.io">V. Fedorov</a>
 
