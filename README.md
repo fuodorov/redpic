@@ -32,7 +32,7 @@ For particle dynamics simulation using finite difference scheme relativistic.
 ### Documentation
 
 The documentation contains all the Latex files needed to generate documentation. 
-The main source files are located in the `documentation/src`.
+The main source files are located in the `docs/src`.
 
 * [main.tex](/docs/src/main.tex) is documentation source file. 
 The final PDF can be found [here](/docs/out/main.pdf).
