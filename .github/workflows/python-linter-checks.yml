@@ -1,6 +1,9 @@
-name: Tests
+name: Python Linter Checks
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -21,8 +24,8 @@ jobs:
         with:
             python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Install deps (library & development)
         run: make deps
 
-      - name: Run checks
+      - name: Run linters, formatters for current python versions
         run: make lint
