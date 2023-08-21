@@ -1,0 +1,75 @@
+\section{Physical model}\label{sec:physical-model}
+
+First, we write the main quantities in the difference scheme, then we consider the algorithm.
+
+\subsection{Basic values}\label{subsec:basic-values}
+At the initial time $t$ set Cartesian coordinates of the $i-$particles $\overrightarrow{r_{i}} = (x_i, y_i, z_i)$ and the initial pulses $\overrightarrow{p_{i}} = (p_{x_i}, p_{y_i}, p_{z_i})$.
+Minimum time step is set $\delta t$.
+
+For convenience, made dimensionless physical quantities (with tilde) (\ref{eq:r_tilde} -~\ref{eq:H_tilde}):
+\begin{equation}
+    \label{eq:r_tilde}
+    \widetilde{\overrightarrow{r_i}} = \frac{\overrightarrow{r_i}}{c \delta t},
+\end{equation}
+\begin{equation}
+\label{eq:E_tilde}
+    \widetilde{\overrightarrow{E_i}} = \frac{\overrightarrow{E_i}e}{mc} \delta t,
+\end{equation}
+\begin{equation}
+\label{eq:H_tilde}
+    \widetilde{\overrightarrow{H_i}} = \frac{\overrightarrow{H_i}e}{mc} \delta t,
+\end{equation}
+where $m$ is the speed of light, $e$ is the particle charge and $m$ is the particle mass.
+
+\subsection{Algorithm}\label{subsec:algorithm}
+
+Consider the relativistic difference scheme algorithm step by step~\cite{Logatchev2011}:
+
+\begin{enumerate}
+    \label{en:algorithm}
+    \item Calculation of electric fields $\overrightarrow{E_i}$ at the points where the particles are.
+    \item Pulse increment:
+    \begin{equation}
+        \overrightarrow{p_i} = \overrightarrow{p_i} + 2\cdot\overrightarrow{E_i},
+    \end{equation}
+    where the coefficient means that the increment of the pulse is made for the entire time interval $2\delta t.$
+    \item New speeds are calculated by new impulses:
+    \begin{equation}
+        \overrightarrow{v_i} = \frac{\overrightarrow{p_i}}{\gamma_i},
+    \end{equation}
+    where $\gamma_i = \sqrt{1 + \overrightarrow{p_i}^2}.$
+    \item At new speeds, new coordinates are calculated:
+    \begin{equation}
+        \overrightarrow{r_i} = \overrightarrow{r_i} + 1\cdot\overrightarrow{v_i},
+    \end{equation}
+    where the coefficient means that the increment of the coordinate is made for the time interval $\delta t.$
+    \item Calculation of magnetic fields $\overrightarrow{H_i}$ at the new points where the particles are.
+    \item Calculated velocity values (after rotation in a magnetic field):
+    
+    \[
+            b_1 = 1 - \frac{H_i^2}{\gamma_i},
+            b_2 = 1 + \frac{H_i^2}{\gamma_i}, 
+            b_3 = 2\cdot \frac{\overrightarrow{v_i}\cdot\overrightarrow{H_i}}{\gamma_i},
+    \]
+    
+    \[
+    \overrightarrow{f_i} = 2\cdot \frac{\overrightarrow{v_i}\times \overrightarrow{H_i}}{\gamma_i},
+    \]
+    
+    \begin{equation}
+        \overrightarrow{v_i} = \frac{\overrightarrow{v_i}b_1 + \overrightarrow{f_i} + \frac{\overrightarrow{H_i}}{\gamma_i}b_3}{b_2}.
+    \end{equation}
+    \item At new speeds, new coordinates are calculated:
+    \begin{equation}
+        \overrightarrow{r_i} = \overrightarrow{r_i} + 1\cdot\overrightarrow{v_i},
+    \end{equation}
+    where the coefficient means that the increment of the coordinate is made for the time interval $\delta t.$   
+    \item New impulses are calculated according to the new rates:
+    \begin{equation}
+        \overrightarrow{p_i} = \overrightarrow{v_i}\gamma_i.
+    \end{equation}
+    
+    
+\end{enumerate}
+
+One cycle is performed in a time interval $2\delta t.$
