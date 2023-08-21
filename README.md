@@ -1,16 +1,14 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 [![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
 
-Further development will take place in the [binp-dev/redpic](https://github.com/binp-dev/redpic) repository.
-
 ## The RED-code
-<a href="https://fuodorov.github.io">V. Fedorov</a>
+<a href="https://github.com/fuodorov">V. Fedorov</a>, <a href="https://github.com/Danila-Nikiforov">D. Nikiforov</a>
 
 ## Overview
 
 This RED code has been developed since 2020 at the Budker Institute of Nuclear Physics as an alternative to ASTRA, WARP, and other codes. For particle dynamics simulation using finite difference scheme relativistic.
 
-In order to use the REDPIC code correctly, it is **important to read the [Know-How](https://github.com/fuodorov/redpic/tree/master/rednote).**
+In order to use the REDPIC code correctly, it is **important to read the [Know-How](notebooks).**
 
 ## Algorithm
 
@@ -22,7 +20,7 @@ REDPIC completely written in Python.
 
 ## Installation
 
-In order to quickly install all the required [Python](https://www.python.org/downloads/) libraries in the new environment, just download [requirements](https://github.com/fuodorov/redpic/blob/master/requirements.txt) and run the command on the command line:
+In order to quickly install all the required [Python](https://www.python.org/downloads/) libraries in the new environment, just download [requirements](requirements.txt) and run the command on the command line:
 
 ```
 pip install -r requirements.txt
