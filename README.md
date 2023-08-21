@@ -12,6 +12,7 @@ For particle dynamics simulation using finite difference scheme relativistic.
 ## Table of content 
 
 -   [Getting Started](#getting-started)
+    -   [Local build and launch](#local-build-and-launch)
     -   [Documentation](#documentation)
         -   [Adding a new section](#adding-a-new-section)
     -   [Additional resources](#additional-resources)
@@ -28,6 +29,16 @@ For particle dynamics simulation using finite difference scheme relativistic.
     -   [Maintaining](#maintaining)
 
 ## Getting Started
+
+### Local build and launch
+
+To build our application and create a Docker image, it will be enough to run the following command:
+
+`docker build -t redpic .`
+
+To launch the application, use the command:
+
+`docker run -it redpic`
 
 ### Documentation
 
