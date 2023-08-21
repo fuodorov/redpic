@@ -101,7 +101,7 @@ class Beam(kv.Beam):
         if distribution == "KV":
             s = np.random.normal(0, 1, int(self.n))
             t = np.random.normal(0, 1, int(self.n))
-            u = np.random.normal(0, 1, int(self.n))
+            u = np.random.normal(0, 1, int(self.n))  # pylint: disable=W0621
             v = np.random.normal(0, 1, int(self.n))
             norm = (s * s + t * t + u * u + v * v) ** 0.5
             (s, t, u, v) = (s, t, u, v) / norm
