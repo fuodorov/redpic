@@ -22,5 +22,5 @@ setup(
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering :: Physics",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.10",
 )
