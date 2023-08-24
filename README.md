@@ -1,5 +1,4 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
-[![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
 
 This PIC code has been developed since 2020 at the Budker Institute of Nuclear Physics as an alternative to 
 [ASTRA](https://www.desy.de/~mpyflo/), 
