@@ -9,6 +9,7 @@ on:
 
 jobs:
   build:
+    name: Build and check code
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
