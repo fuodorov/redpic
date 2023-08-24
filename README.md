@@ -1,6 +1,6 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 
-This PIC code has been developed since 2020 at the Budker Institute of Nuclear Physics as an alternative to 
+This PIC code has been developed since 2020 as an alternative to 
 [ASTRA](https://www.desy.de/~mpyflo/), 
 [WARP](https://bitbucket.org/berkeleylab/warp/), 
 [XTRACK](https://xsuite.readthedocs.io/en/latest/) 
@@ -96,8 +96,6 @@ You should install [git](https://git-scm.com) on your computer. And have [GitHub
 
 * **[Vyacheslav Fedorov](https://github.com/fuodorov)** - *Initial work*
 * **[Danila Nikiforov](https://github.com/Danila-Nikiforov)** - *Initial work*
-
-See also the list of [contributors](https://github.com/binp-dev/redpic/contributors) who participated in this project.
 
 ## License
 
