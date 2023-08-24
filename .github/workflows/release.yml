@@ -36,7 +36,7 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           root_file: main.tex
-          working_directory: docs/latex/src/
+          working_directory: manual/src/
 
       - name: Create GitHub Release
         id: create_release
@@ -73,6 +73,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: docs/latex/src/main.pdf
-          asset_name: ${{ github.event.repository.name }}-manual-${{ github.ref }}.pdf
+          asset_path: manual/src/main.pdf
+          asset_name: ${{ github.event.repository.name }}-manual-${{ github.ref_name }}.pdf
           asset_content_type: pdf
