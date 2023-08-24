@@ -15,7 +15,7 @@ format: ## autoformat code with black and isort
 	python3 -m isort redpic setup.py
 	python3 -m black redpic setup.py
 
-deploy: ## deploy package on pypi
+release: ## release package on pypi
 	python3 -m setup sdist bdist_wheel
 	python3 -m twine upload dist/*
 
