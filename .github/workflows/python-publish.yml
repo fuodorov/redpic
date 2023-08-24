@@ -3,7 +3,7 @@ name: Python Publish
 on:
   push:
     tags:
-      - "v*"
+      - "*.*.*"
 
 jobs:
   build-and-publish:
