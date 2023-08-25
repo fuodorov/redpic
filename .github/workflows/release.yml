@@ -18,7 +18,6 @@ jobs:
         id: build-docs
         uses: ammaraskar/sphinx-action@master
         with:
-          build-command: "sphinx-build -b html . _build"
           docs-folder: "docs/"
 
       - name: Create an artifact of the html output.
