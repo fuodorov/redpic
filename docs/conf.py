@@ -17,9 +17,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'No Errors Test Project'
-copyright = '2019, sphinx-action Test Suite'
-author = 'sphinx-action Test Suite'
+project = u'redpic'
+copyright = u'2023, REDPIC contributors'
+author = u'Vyacheslav Fedorov, Danila Nikiforov'
 
 
 # -- General configuration ---------------------------------------------------
@@ -38,6 +38,14 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+source_suffix = '.rst'
+
+# The encoding of source files.
+#
+# source_encoding = 'utf-8-sig'
+
+# The master toctree document.
+master_doc = 'index'
 
 # -- Options for HTML output -------------------------------------------------
 

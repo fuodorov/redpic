@@ -74,7 +74,7 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           root_file: main.tex
-          working_directory: manual/src/
+          working_directory: manual/
 
       - name: Upload Release Asset (pdf) to GitHub
         uses: actions/upload-release-asset@v1
@@ -82,7 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: manual/src/main.pdf
+          asset_path: manual/main.pdf
           asset_name: ${{ github.event.repository.name }}-manual-${{ github.ref_name }}.pdf
           asset_content_type: pdf
 

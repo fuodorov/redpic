@@ -1,6 +1,6 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 
-This PIC code has been developed since 2020 as an alternative to 
+This PIC code has been developed since 2022 as an alternative to 
 [ASTRA](https://www.desy.de/~mpyflo/), 
 [WARP](https://bitbucket.org/berkeleylab/warp/), 
 [XTRACK](https://xsuite.readthedocs.io/en/latest/) 
