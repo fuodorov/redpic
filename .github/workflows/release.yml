@@ -6,6 +6,48 @@ on:
       - "*.*.*"
 
 jobs:
+  build-and-publish-docs:
+    name: Build and publish docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Build docs
+        id: build-docs
+        uses: ammaraskar/sphinx-action@master
+        with:
+          build-command: "sphinx-build -b html . _build"
+          docs-folder: "docs/"
+
+      - name: Create an artifact of the html output.
+        id: create-artifact-html-output
+        uses: actions/upload-artifact@v1
+        with:
+          name: DocumentationHTML
+          path: docs/_build/html/
+
+      - name: Commit documentation changes
+        id: commit-docs-changes
+        run: |
+          git clone https://github.com/fuodorov/redpic.git --branch gh-pages --single-branch gh-pages
+          cp -r docs/_build/html/* gh-pages/
+          cd gh-pages
+          touch .nojekyll
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update documentation" -a || true
+
+      - name: Push changes
+        id: push-docs-changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: gh-pages
+          directory: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
   build-and-publish:
     name: Build and publish to PyPI and GitHub
     runs-on: ubuntu-latest
