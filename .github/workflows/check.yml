@@ -8,8 +8,8 @@ on:
       - "**.py"
 
 jobs:
-  build:
-    name: Build and check code
+  check:
+    name: Check code
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
