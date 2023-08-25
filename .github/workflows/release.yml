@@ -24,7 +24,7 @@ jobs:
         id: create-artifact-html-output
         uses: actions/upload-artifact@v1
         with:
-          name: DocumentationHTML
+          name: Documentation HTML
           path: docs/_build/html/
 
       - name: Commit documentation changes
