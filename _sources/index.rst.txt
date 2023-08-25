@@ -1,20 +1,12 @@
-.. No Errors Test Project documentation master file, created by
-   sphinx-quickstart on Fri Aug 30 17:07:56 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+REDPIC documentation
+======================================================
 
-Welcome to No Errors Test Project's documentation!
-==================================================
+Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Hello World!
+This PIC code has been developed since 2022 as an alternative to
+`ASTRA <https://www.desy.de/~mpyflo/>`_,
+`WARP <https://bitbucket.org/berkeleylab/warp/>`_,
+`XTRACK <https://xsuite.readthedocs.io/en/latest/>`_
+and other codes.
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+For particle dynamics simulation using finite difference scheme relativistic.
