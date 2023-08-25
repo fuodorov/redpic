@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: deps lint format release help
+.PHONY: deps lint format release test help
 
 REPO_ROOT:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
@@ -18,6 +18,10 @@ format: ## autoformat code with black and isort
 release: ## release package on pypi
 	python3 -m setup sdist bdist_wheel
 	python3 -m twine upload dist/*
+
+test: ## run test
+	python3 -m pytest tests/unit/src
+	python3 -m pytest tests/functional/src
 
 help: ## Show help message
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
