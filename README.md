@@ -109,8 +109,11 @@ Use `make deps` command to install library, its production and development depen
 ### Formatting
 Use `make format` to autoformat code with black tool. 
 
-### Tests
+### Linter
 Use `make lint` to run only linters for current python version
+
+### Test
+Use `make test` to run test for current python version
 
 ### Maintaining
 If pull request consists of several meaningful commits, that should be preserved, 
