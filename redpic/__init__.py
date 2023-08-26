@@ -1,14 +1,11 @@
-"""
-Relativictic Difference Scheme Particle-in-Cell code (REDPIC) init file.
+from redpic.accelerator import *
+from redpic.beam import *
+from redpic.constants import *
+from redpic.core import config
+from redpic.solver import *
 
-"""
+__version__ = config.PROJECT_VERSION
 
-from .accelerator import *
-from .beam import *
-from .constants import *
-from .solver import *
-
-__version__ = "0.7.20"
-__doc__ = """Relativictic Difference Scheme Particle-in-Cell code (REDPIC)"""
+__doc__ = config.PROJECT_DOC
 
 __all__ = constants.__all__ + beam.__all__ + solver.__all__ + accelerator.__all__

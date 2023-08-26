@@ -1,19 +1,19 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
-import redpic
+from redpic.core import config
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="redpic",
-    version=redpic.__version__,
-    author="Vyacheslav Fedorov",
-    author_email="slava@fuodorov.ru",
-    description=redpic.__doc__,
+    name=config.PROJECT_NAME,
+    version=config.PROJECT_VERSION,
+    author=config.PROJECT_AUTHOR,
+    author_email=config.PROJECT_AUTHOR_EMAIL,
+    description=config.PROJECT_DOC,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/fuodorov/redpic",
+    url=config.PROJECT_URL,
     packages=["redpic"],
     classifiers=[
         "Programming Language :: Python :: 3",

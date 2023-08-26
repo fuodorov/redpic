@@ -1,20 +1,25 @@
+import logging
+
 import kenv as kv
 import numpy as np
 import pandas as pd
 
-from .constants import *  # pylint: disable=W0614
+from redpic.constants import *  # pylint: disable=W0614,W0401
 
 __all__ = ["Beam", "read_distribution_astra", "read_distribution_file"]
 
+module_logger = logging.getLogger(__name__)
+
 
 def read_distribution_file(fname):
-    """Read distribution from file .csv"""
+    module_logger.info("Read distribution from file")
     df = pd.read_csv(fname, dtype="float32")
     return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
 
 
 def read_distribution_astra(fname):
-    """Read distribution from Astra file"""
+    module_logger.info("Read distribution from Astra file")
+
     cols = ["x", "y", "z", "px", "py", "pz", "clock", "charge", "id", "flag"]
     #        m    m    m    eV/c  eV/c  eV/c  ns       nC
     df = pd.read_csv(fname, header=None, delim_whitespace=True, names=cols, dtype="float32")
@@ -59,7 +64,7 @@ class Beam(kv.Beam):
         y: float = 0.0e0,
         z: float = 0.0e0,
         xp: float = 0.0e0,
-        yp: float = 0.0e0
+        yp: float = 0.0e0,
     ):
         super().__init__(
             current=current,
@@ -95,6 +100,7 @@ class Beam(kv.Beam):
         This function generates a beam with a given distribution and initial beam displacement.
         """
         assert n > 0, "The number of particles (n) must be a positive number!"
+        module_logger.info("Generate a beam with a given distribution")
 
         self.distribution = distribution
         self.n = n
@@ -118,7 +124,7 @@ class Beam(kv.Beam):
         self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
 
     def upload(self, file_name: str):
-        """Particle loading"""
+        module_logger.info("Particle loading")
         file_extension = file_name.split(".")[-1]
 
         if file_extension == "ini":

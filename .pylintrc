@@ -18,6 +18,5 @@ disable=
     R0913, # Too many arguments (6/5) (too-many-arguments)
     R0914, # Too many local variables (19/15) (too-many-locals)
     R1710, # Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
-    W0401, # Wildcard import beam (wildcard-import)
     W0622, # Redefining built-in 'type' (redefined-builtin)
     W1202, # Use lazy % formatting in logging functions (logging-format-interpolation)
