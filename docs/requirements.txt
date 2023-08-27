@@ -1,1 +1,2 @@
 nbsphinx
+jinja2>=3.0
