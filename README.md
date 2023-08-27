@@ -42,13 +42,13 @@ To launch the application, use the command:
 ### Documentation
 
 The documentation contains all the Latex files needed to generate documentation. 
-The main source files are located in the `docs/src`.
+The main source files are located in the `manual`.
 
-* [main.tex](/docs/src/main.tex) is documentation source file. 
-The final PDF can be found [here](/docs/out/main.pdf).
+* [main.tex](/manual/main.tex) is documentation source file. 
+The final PDF can be found [here](https://github.com/fuodorov/redpic/releases/latest).
 
-[main.tex](/docs/src/main.tex) is the source file that Latex compiler will use to generate the paper. 
-However, in order to keep the code cleaner, the main sections of the paper are all located in the [sections](/docs/src/sections). 
+[main.tex](/manual/main.tex) is the source file that Latex compiler will use to generate the paper. 
+However, in order to keep the code cleaner, the main sections of the paper are all located in the [sections](/manual/sections). 
 In this way you will experience less merging issues when two or more people are working on the same doc.
 
 Just edit the text in the relative Latex file (e.g., introduction, methodology, etc.) and you should be ready to go. 
@@ -56,8 +56,8 @@ No need to change any other file.
 
 #### Adding a new section
 
-Just copy a section file (e.g., [introduction.tex](/docs/src/sections/introduction.tex)) paste it in the same directory. 
-Rename the pasted file (e.g. first_chapter.tex) and add this file to [main.tex](/docs/src/main.tex).
+Just copy a section file (e.g., [introduction.tex](/manual/sections/introduction.tex)) paste it in the same directory. 
+Rename the pasted file (e.g. first_chapter.tex) and add this file to [main.tex](/manual/main.tex).
 
 ### Additional Resources
 
@@ -109,8 +109,11 @@ Use `make deps` command to install library, its production and development depen
 ### Formatting
 Use `make format` to autoformat code with black tool. 
 
-### Tests
+### Linter
 Use `make lint` to run only linters for current python version
+
+### Test
+Use `make test` to run test for current python version
 
 ### Maintaining
 If pull request consists of several meaningful commits, that should be preserved, 
