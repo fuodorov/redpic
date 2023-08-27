@@ -6,7 +6,7 @@ logging_config.dictConfig(LOGGING)
 
 PROJECT_NAME = "redpic"
 
-PROJECT_VERSION = "0.7.29"
+PROJECT_VERSION = "0.7.30"
 
 PROJECT_AUTHOR = "Vyacheslav Fedorov"
 
