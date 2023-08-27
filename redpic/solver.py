@@ -1,5 +1,3 @@
-import logging
-
 import numpy as np
 import pandas as pd
 from numba import jit, prange
@@ -11,13 +9,10 @@ from redpic.constants import *  # pylint: disable=W0614,W0401
 
 __all__ = ["Simulation", "Sim"]
 
-module_logger = logging.getLogger(__name__)
-
 
 def get_field_accelerator(
     acc: Accelerator, type: str, x: np.array, y: np.array, z: np.array
 ) -> (np.array, np.array, np.array):
-    module_logger.info("Get an electric or magnetic field at a specific location in the accelerator")
     assert type in ("E", "B"), "Check type field! (E or B)"
 
     dz = acc.dz
@@ -54,7 +49,6 @@ def get_field_accelerator(
 def sum_field_particles(
     x: np.array, y: np.array, z: np.array, z_start: float, z_stop: float
 ) -> (np.array, np.array, np.array):
-    module_logger.info("Sum particles fields")
     n = int(len(x))
     Fx = np.zeros(n)
     Fy = np.zeros(n)
@@ -72,9 +66,6 @@ def sum_field_particles(
 def get_field_beam(
     beam: Beam, acc: Accelerator, type: str, x: np.array, y: np.array, z: np.array
 ) -> (np.array, np.array, np.array):
-    module_logger.info(
-        "Get an electric [MV/m] or magnetic [T] field space charge at a specific location in the accelerator"
-    )
     assert type in ("E", "B"), "Check type field! (E or B)"
     Q = beam.total_charge
     q = Q / beam.n
@@ -100,7 +91,6 @@ def first_step_red(
     z_start: float,
     z_stop: float,
 ) -> (np.array, np.array, np.array, np.array, np.array, np.array):
-    module_logger.info("First step for Relativictic Difference Scheme")
     n = int(len(x))
     for i in prange(n):  # pylint: disable=E1133
         if z_start <= z[i] <= z_stop:
@@ -135,7 +125,6 @@ def second_step_red(
     z_start: float,
     z_stop: float,
 ) -> (np.array, np.array, np.array, np.array, np.array, np.array):
-    module_logger.info("Second step for Relativictic Difference Scheme")
     n = int(len(x))
     for i in prange(n):  # pylint: disable=E1133
         if z_start <= z[i] <= z_stop:
@@ -174,7 +163,6 @@ class Simulation:
         self.result = {}
 
     def track(self, *, n_files: int = 20) -> None:
-        module_logger.info("Tracking!")
         assert n_files > 0, "The number of files (n_files) must be a positive number!"
 
         # Init parameterss

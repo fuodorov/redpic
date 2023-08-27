@@ -9,3 +9,5 @@ setuptools==65.5.1
 twine==4.0.2
 wheel==0.41.2
 pytest==7.4.0
+holoviews==1.17.1
+matplotlib==3.7.2
