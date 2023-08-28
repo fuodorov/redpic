@@ -5,7 +5,7 @@ from scipy import misc
 
 from redpic import constants as const
 from redpic.accelerator import Accelerator
-from redpic.beam import Beam
+from redpic.beam import BaseBeam
 
 __all__ = ["Simulation", "Sim"]
 
@@ -76,7 +76,7 @@ class Simulation:
         return Fx, Fy, Fz
 
     def _get_field_beam(
-        self, beam: Beam, acc: Accelerator, type: str, x: np.array, y: np.array, z: np.array
+        self, beam: BaseBeam, acc: Accelerator, type: str, x: np.array, y: np.array, z: np.array
     ) -> (np.array, np.array, np.array):
         assert type in ("E", "B"), "Check type field! (E or B)"
         Q = beam.total_charge
