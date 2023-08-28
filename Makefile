@@ -8,12 +8,12 @@ deps: ## install deps (library & development)
 	python3 -m pip install -r requirements/dev.txt
 
 lint: ## run linters, formatters for current python versions
-	python3 -m flake8 redpic
-	python3 -m pylint redpic
+	python3 -m flake8 redpic tests setup.py
+	python3 -m pylint redpic tests setup.py
 
 format: ## autoformat code with black and isort
-	python3 -m isort redpic setup.py
-	python3 -m black redpic setup.py
+	python3 -m isort redpic tests setup.py
+	python3 -m black redpic tests setup.py
 
 release: ## release package on pypi
 	python3 -m setup sdist bdist_wheel

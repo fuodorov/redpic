@@ -4,7 +4,7 @@ import kenv as kv
 import numpy as np
 import pandas as pd
 
-from redpic.constants import *  # pylint: disable=W0614,W0401
+from redpic import constants as const
 
 __all__ = ["Beam", "read_distribution_astra", "read_distribution_file"]
 
@@ -36,7 +36,7 @@ def read_distribution_astra(fname):
     pz0 = df0.pz.values[0]
 
     # Recalculate z and pz:
-    df["z"] = z0 + df["clock"] * 1e-9 * c  # m
+    df["z"] = z0 + df["clock"] * 1e-9 * const.c  # m
     df["pz"] = (pz0 + df["pz"]) / 1e6  # MeV/c
     return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
 
@@ -47,7 +47,7 @@ class Beam(kv.Beam):
     def __init__(
         self,
         *,
-        type: Element = electron,
+        type: const.Element = const.electron,
         current: float = 0.0e0,
         energy: float = 0.0e0,
         radius: float = 0.0e0,
@@ -91,7 +91,7 @@ class Beam(kv.Beam):
         self.radius_z = radius_z
         self.z = z
         self.total_charge = (
-            2 * type.charge / abs(type.charge) * self.current * self.radius_z / c / self.beta
+            2 * type.charge / abs(type.charge) * self.current * self.radius_z / const.c / self.beta
         )  # beam charge
 
     def generate(self, distribution: str = "KV", n: int = 0, *, dpz: float = 0.01):

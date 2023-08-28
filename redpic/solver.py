@@ -3,9 +3,9 @@ import pandas as pd
 from numba import jit, prange
 from scipy import misc
 
-from redpic.accelerator import *  # pylint: disable=W0614,W0401
-from redpic.beam import *  # pylint: disable=W0614,W0401
-from redpic.constants import *  # pylint: disable=W0614,W0401
+from redpic import constants as const
+from redpic.accelerator import Accelerator
+from redpic.beam import Beam
 
 __all__ = ["Simulation", "Sim"]
 
@@ -71,10 +71,14 @@ def get_field_beam(
     q = Q / beam.n
     if type == "E":
         Ex, Ey, Ez = sum_field_particles(x, y, z, acc.z_start, acc.z_stop)
-        return ke / (4 * np.pi) * q * Ex / 1e6, ke / (4 * np.pi) * q * Ey / 1e6, ke / (4 * np.pi) * q * Ez / 1e6
+        return (
+            const.ke / (4 * np.pi) * q * Ex / 1e6,
+            const.ke / (4 * np.pi) * q * Ey / 1e6,
+            const.ke / (4 * np.pi) * q * Ez / 1e6,
+        )
     if type == "B":
         Bx, By, Bz = sum_field_particles(x, y, z, acc.z_start, acc.z_stop)
-        return km / (4 * np.pi) * q * Bx, -km / (4 * np.pi) * q * By, 0 * km / (4 * np.pi) * q * Bz
+        return const.km / (4 * np.pi) * q * Bx, -const.km / (4 * np.pi) * q * By, 0 * const.km / (4 * np.pi) * q * Bz
 
 
 @jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
@@ -172,14 +176,14 @@ class Simulation:
         z_start = self.acc.z_start
         z_stop = self.acc.z_stop
         dz = self.acc.dz
-        dt = dz / c
-        t_max = (z_stop - z_start) / c
+        dt = dz / const.c
+        t_max = (z_stop - z_start) / const.c
 
         m = self.beam.type.mass
         q = self.beam.type.charge
 
-        P0 = m * c * c / (e * 1e6)
-        E0 = m * c / (q * dt * 1e6)
+        P0 = m * const.c * const.c / (const.e * 1e6)
+        E0 = m * const.c / (q * dt * 1e6)
         B0 = m / (q * dt)
 
         # RED
@@ -229,7 +233,7 @@ class Simulation:
             Ex, Ey, Ez = Ex * E0, Ey * E0, Ez * E0
 
             progress = t / t_max * 100
-            meters = z_start + t * c
+            meters = z_start + t * const.c
             X = np.row_stack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, Ex, Ey, Ez))
             Xt = np.transpose(X)
             df = pd.DataFrame(Xt, columns=["x", "y", "z", "px", "py", "pz", "Bx", "By", "Bz", "Ex", "Ey", "Ez"])

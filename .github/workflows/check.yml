@@ -37,7 +37,7 @@ jobs:
           python -m pip install -r requirements.txt
 
       - name: Run flake8 current python versions
-        run: python -m flake8 redpic
+        run: python -m flake8 redpic tests setup.py
 
       - name: Run pylint current python versions
-        run: python -m pylint redpic
+        run: python -m pylint redpic tests setup.py

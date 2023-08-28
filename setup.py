@@ -2,7 +2,7 @@ from setuptools import setup
 
 from redpic.core import config
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
