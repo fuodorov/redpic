@@ -6,39 +6,9 @@ import pandas as pd
 
 from redpic import constants as const
 
-__all__ = ["Beam", "read_distribution_astra", "read_distribution_file"]
+__all__ = ["Beam"]
 
 module_logger = logging.getLogger(__name__)
-
-
-def read_distribution_file(fname):
-    module_logger.info("Read distribution from file")
-    df = pd.read_csv(fname, dtype="float32")
-    return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
-
-
-def read_distribution_astra(fname):
-    module_logger.info("Read distribution from Astra file")
-
-    cols = ["x", "y", "z", "px", "py", "pz", "clock", "charge", "id", "flag"]
-    #        m    m    m    eV/c  eV/c  eV/c  ns       nC
-    df = pd.read_csv(fname, header=None, delim_whitespace=True, names=cols, dtype="float32")
-
-    df = df[df.flag != -15]  # ignore the lost particles
-    df["px"] = df["px"] / 1e6  # MeV/c
-    df["py"] = df["py"] / 1e6  # MeV/c
-
-    # remove the reference particle
-    df0 = df.head(1)
-    df = df.drop(df0.index)
-
-    z0 = df0.z.values[0]
-    pz0 = df0.pz.values[0]
-
-    # Recalculate z and pz:
-    df["z"] = z0 + df["clock"] * 1e-9 * const.c  # m
-    df["pz"] = (pz0 + df["pz"]) / 1e6  # MeV/c
-    return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
 
 
 class Beam(kv.Beam):
@@ -123,17 +93,45 @@ class Beam(kv.Beam):
         self.da = np.row_stack((x, y, z, px, py, pz))
         self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
 
+    def _read_distribution_file(self, fname):
+        module_logger.info("Read distribution from file")
+        df = pd.read_csv(fname, dtype="float32")
+        return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
+
+    def _read_distribution_astra(self, fname):
+        module_logger.info("Read distribution from Astra file")
+
+        cols = ["x", "y", "z", "px", "py", "pz", "clock", "charge", "id", "flag"]
+        #        m    m    m    eV/c  eV/c  eV/c  ns       nC
+        df = pd.read_csv(fname, header=None, delim_whitespace=True, names=cols, dtype="float32")
+
+        df = df[df.flag != -15]  # ignore the lost particles
+        df["px"] = df["px"] / 1e6  # MeV/c
+        df["py"] = df["py"] / 1e6  # MeV/c
+
+        # remove the reference particle
+        df0 = df.head(1)
+        df = df.drop(df0.index)
+
+        z0 = df0.z.values[0]
+        pz0 = df0.pz.values[0]
+
+        # Recalculate z and pz:
+        df["z"] = z0 + df["clock"] * 1e-9 * const.c  # m
+        df["pz"] = (pz0 + df["pz"]) / 1e6  # MeV/c
+        return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
+
     def upload(self, file_name: str):
         module_logger.info("Particle loading")
         file_extension = file_name.split(".")[-1]
 
         if file_extension == "ini":
-            x, y, z, px, py, pz = read_distribution_astra(file_name)
+            x, y, z, px, py, pz = self._read_distribution_astra(file_name)
             self.n = int(len(x))
             self.da = np.row_stack((x, y, z, px, py, pz))
             self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
         if file_extension == "csv":
-            x, y, z, px, py, pz = read_distribution_file(file_name)
+            x, y, z, px, py, pz = self._read_distribution_file(file_name)
             self.n = int(len(x))
             self.da = np.row_stack((x, y, z, px, py, pz))
             self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
