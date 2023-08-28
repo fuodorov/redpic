@@ -1,4 +1,4 @@
-from redpic.beam.base import BaseBeam
-from redpic.beam.uniform import UniformBeam
+from .base import BaseBeam
+from .uniform import UniformBeam
 
 __all__ = ["BaseBeam", "UniformBeam"]

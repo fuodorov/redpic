@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import pandas as pd
 
-from redpic.beam.base import BaseBeam
+from .base import BaseBeam
 
 module_logger = logging.getLogger(__name__)
 

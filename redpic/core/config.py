@@ -1,12 +1,12 @@
 from logging import config as logging_config
 
-from redpic.core.logger import LOGGING
+from .logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
 PROJECT_NAME = "redpic"
 
-PROJECT_VERSION = "0.7.36"
+PROJECT_VERSION = "0.7.37"
 
 PROJECT_AUTHOR = "Vyacheslav Fedorov"
 

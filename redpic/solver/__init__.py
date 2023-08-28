@@ -3,9 +3,9 @@ import pandas as pd
 from numba import jit, prange
 from scipy import misc
 
-from redpic import constants as const
-from redpic.accelerator import Accelerator
-from redpic.beam.base import BaseBeam
+from .. import constants as const
+from ..accelerator import Accelerator
+from ..beam.base import BaseBeam
 
 __all__ = ["Simulation"]
 
