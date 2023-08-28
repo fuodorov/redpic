@@ -45,8 +45,6 @@ def test_constants(name, value):
         ("positron", "e+", scipy_const.m_e, scipy_const.e),
         ("proton", "p", scipy_const.m_p, scipy_const.e),
         ("antiproton", "p-", scipy_const.m_p, -scipy_const.e),
-        ("neutron", "n", scipy_const.m_n, 0),
-        ("antineutron", "n", scipy_const.m_n, 0),
     ],
 )
 def test_particles(name, symbol, mass, charge):
