@@ -1,8 +1,8 @@
-from .accelerator import *
-from .beam import *
-from .constants import *
-from .core import config
-from .solver import *
+from redpic.accelerator import *
+from redpic.beam import *
+from redpic.constants import *
+from redpic.core import config
+from redpic.solver import *
 
 __version__ = config.PROJECT_VERSION
 

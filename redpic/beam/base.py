@@ -5,7 +5,7 @@ import kenv as kv
 import numpy as np
 import pandas as pd
 
-from .. import constants as const
+from redpic import constants as const
 
 module_logger = logging.getLogger(__name__)
 
