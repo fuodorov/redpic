@@ -2,7 +2,7 @@ from collections import namedtuple
 
 import numpy as np
 import periodictable
-from scipy import constants as const
+from scipy import constants
 
 __all__ = [
     "speed_of_light",
@@ -40,24 +40,24 @@ __all__ = [
 ]
 
 # Constants
-c = speed_of_light = const.c
+c = speed_of_light = constants.c
 
-ep_0 = epsilon_0 = const.epsilon_0
-mu_0 = const.mu_0
-h = const.h
-hbar = const.hbar
+ep_0 = epsilon_0 = constants.epsilon_0
+mu_0 = constants.mu_0
+h = constants.h
+hbar = constants.hbar
 
 ke = 1 / (4 * np.pi * ep_0)
 km = mu_0 / (4 * np.pi)
 
-e = elementary_charge = const.e
+e = elementary_charge = constants.e
 
-m_e = electron_mass = const.m_e
-mc = electron_mass_energy = const.physical_constants["electron mass energy equivalent in MeV"][0]
-r_0 = electron_radius = const.physical_constants["classical electron radius"][0]
-m_p = proton_mass = const.m_p
-m_n = neutron_mass = const.m_n
-u = m_u = atomic_constant_mass = const.physical_constants["atomic mass constant"][0]
+m_e = electron_mass = constants.m_e
+mc = electron_mass_energy = constants.physical_constants["electron mass energy equivalent in MeV"][0]
+r_0 = electron_radius = constants.physical_constants["classical electron radius"][0]
+m_p = proton_mass = constants.m_p
+m_n = neutron_mass = constants.m_n
+u = m_u = atomic_constant_mass = constants.physical_constants["atomic mass constant"][0]
 
 Element = namedtuple("Element", ["name", "symbol", "mass", "charge"])
 
