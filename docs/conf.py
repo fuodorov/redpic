@@ -13,14 +13,17 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+import redpic
 
 # -- Project information -----------------------------------------------------
 
-project = u'redpic'
-copyright = u'2023, REDPIC contributors'
-author = u'Vyacheslav Fedorov, Danila Nikiforov'
-
+project = redpic.config.PROJECT_NAME
+copyright = redpic.config.PROJECT_NAME
+author = redpic.config.PROJECT_AUTHOR
+# The short X.Y version.
+version = redpic.config.PROJECT_VERSION
+# The full version, including alpha/beta/rc tags.
+release = redpic.config.PROJECT_VERSION
 
 # -- General configuration ---------------------------------------------------
 
