@@ -15,17 +15,18 @@ Contents of the documentation
 -----------------------------
 
 If you are new to REDPIC, we **strongly recommend** that you read the
-section :doc:`tutorial` first, so as to have a basic understanding of
+section :doc:`tutorial/tutorial` first, so as to have a basic understanding of
 what the code does.
 
-You can then see the section :doc:`installation` and
-:doc:`tutorial`, to get started with using REDPIC.
+You can then see the section :doc:`install/installation` and
+:doc:`tutorial/tutorial`, to get started with using REDPIC.
 
 .. toctree::
   :maxdepth: 1
 
-  installation
-  tutorial
+  install/installation
+  tutorial/tutorial
+  test/test
 
 Contributing to REDPIC
 ----------------------
