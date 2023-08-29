@@ -33,8 +33,6 @@ __all__ = [
     "positron",
     "proton",
     "antiproton",
-    "neutron",
-    "antineutron",
     "Element",
     "Particle",
 ]
@@ -65,8 +63,6 @@ electron = Element(name="electron", symbol="e", mass=m_e, charge=-e)
 positron = Element(name="positron", symbol="e+", mass=m_e, charge=e)
 proton = Element(name="proton", symbol="p", mass=m_p, charge=e)
 antiproton = Element(name="antiproton", symbol="p-", mass=m_p, charge=-e)
-neutron = Element(name="neutron", symbol="n", mass=m_n, charge=0)
-antineutron = Element(name="antineutron", symbol="n", mass=m_n, charge=0)
 Particle = Element
 
 # Get mass of each element from periodictable
