@@ -15,19 +15,19 @@ Contents of the documentation
 -----------------------------
 
 If you are new to REDPIC, we **strongly recommend** that you read the
-section :doc:`notebooks/tutorial/tutorial.ipynb` first, so as to have a basic understanding of
+section :doc:`tutorial` first, so as to have a basic understanding of
 what the code does.
 
-You can then see the section :doc:`install/installation` and
-:doc:`notebooks/tutorial/tutorial.ipynb`, to get started with using REDPIC.
+You can then see the section :doc:`installation` and
+:doc:`tutorial`, to get started with using REDPIC.
 
 .. toctree::
   :maxdepth: 1
 
-  install/installation
-  notebooks/tutorial/tutorial.ipynb
+  installation
+  tutorial
 
-Contributing to KENV
+Contributing to REDPIC
 ----------------------
 
 REDPIC is open-source, and the source code is hosted `here <http://github.com/fuodorov/redpic>`_, on
