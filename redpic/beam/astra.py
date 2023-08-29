@@ -38,7 +38,7 @@ class AstraBeam(BaseBeam):
         df["pz"] = (pz0 + df["pz"]) / 1e6  # MeV/c
         return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
 
-    def generate(self, *, n: int = 0, file_name: str = "", **kwargs) -> None:
+    def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
         module_logger.info("Particle loading")
 
         if file_name.split(".")[-1] == "ini":

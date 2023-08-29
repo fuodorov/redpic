@@ -70,7 +70,7 @@ class BaseBeam(ABC, kv.Beam):
         )  # beam charge
 
     @abstractmethod
-    def generate(self, *, n: int = 0, file_name: str = "", **kwargs) -> None:
+    def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
         pass
 
     def __str__(self):
