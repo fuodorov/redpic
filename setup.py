@@ -5,7 +5,7 @@ from redpic.core import config
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements/prod.txt", "r", encoding="utf-8") as fh:
+with open("requirements/base.txt", "r", encoding="utf-8") as fh:
     required = fh.read().splitlines()
 
 setup(
