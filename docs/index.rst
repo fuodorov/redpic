@@ -11,15 +11,20 @@ and other codes.
 
 For particle dynamics simulation using finite difference scheme relativistic.
 
+Contents of the documentation
+-----------------------------
 
-Tutorial
------------------------------------------------------
+If you are new to REDPIC, we **strongly recommend** that you read the
+section :doc:`notebooks/tutorial/tutorial.ipynb` first, so as to have a basic understanding of
+what the code does.
 
-We strongly recommend that you read the manual carefully before starting REDPIC for the first time.
+You can then see the section :doc:`install/installation` and
+:doc:`notebooks/tutorial/tutorial.ipynb`, to get started with using REDPIC.
 
 .. toctree::
-  :maxdepth: 2
+  :maxdepth: 1
 
+  install/installation
   notebooks/tutorial/tutorial.ipynb
 
 Contributing to KENV
