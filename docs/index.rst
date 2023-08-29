@@ -21,3 +21,18 @@ We strongly recommend that you read the manual carefully before starting REDPIC 
   :maxdepth: 2
 
   notebooks/tutorial/tutorial.ipynb
+
+Contributing to KENV
+----------------------
+
+REDPIC is open-source, and the source code is hosted `here <http://github.com/fuodorov/redpic>`_, on
+Github.
+
+We welcome contributions to the code!
+
+Research & Attribution
+----------------------
+
+REDPIC was developed by `Vyacheslav Fedorov <https://fuodorov.github.io>`_ and `Danila Nikiforov <mailto:nikdanila@bk.ru>`_.
+
+REDPIC's algorithms are documented in the `manual <https://github.com/fuodorov/redpic/releases/latest>`_.
