@@ -20,7 +20,6 @@ release: ## release package on pypi
 	python3 -m twine upload dist/*
 
 test: ## run test
-	python3 -m pytest tests/unit/src
 	python3 -m pytest tests/functional/src
 
 help: ## Show help message

@@ -65,12 +65,11 @@ class BaseBeam(ABC, kv.Beam):
         self.da = np.array
         self.radius_z = radius_z
         self.z = z
-        try:
-            self.total_charge = (
-                2 * type.charge / abs(type.charge) * self.current * self.radius_z / const.c / self.beta
-            )  # beam charge
-        except ZeroDivisionError:
-            self.total_charge = 0.0e0
+        self.total_charge = (
+            (2 * type.charge / abs(type.charge) * self.current * self.radius_z / const.c / self.beta)
+            if self.beta != 0.0e0
+            else 0.0e0
+        )
 
     @abstractmethod
     def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:

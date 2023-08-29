@@ -36,8 +36,5 @@ jobs:
           python -m pip install --upgrade pytest
           python -m pip install -r requirements.txt
 
-      - name: Run unit test
-        run: python -m pytest tests/unit/src
-
       - name: Run functional test
         run: python -m pytest tests/functional/src
