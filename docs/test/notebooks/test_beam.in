@@ -1,0 +1,21 @@
+35 &INPUT
+  FNAME = 'Example.ini'
+  Ref_clock=0.0E0
+  IPart=80000
+  Species='electrons'
+  Probe=.t.
+  Noise_reduc=.t.
+  Cathode=.t.
+  Q_total=10E3
+  Ref_zpos=0.7E0,Ref_Ekin=1.32E0
+  Dist_z='p',    Lt=20, rt=0.01
+  Dist_pz='p',      sig_Ekin=.00,cor_Ekin=0.0E0
+  Dist_x='r',  Lx=48E0, rx=0.1
+Dist_y='r'  
+Dist_px='r',  Dist_py='r' 
+Nemit_x=200
+Nemit_y=200  
+cor_px = 35
+cor_py = 35
+/
+

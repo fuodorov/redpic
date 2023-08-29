@@ -1,0 +1,202 @@
+&NEWRUN
+ Head=' Example of ASTRA users manual'
+ 
+ RUN=1
+ 
+ Distribution = 'Example.ini',	Xoff=0.0,	Yoff=0.0,
+ 
+ Loop=F, NLoop=2,  
+ 
+ TRACK_ALL=T,     Auto_phase=F
+ 
+ Phase_Scan=F
+ 
+ H_max=1.0000E-02,     H_min=0.0
+
+ EmitS=.T.
+ 
+ PhaseS=.T.
+ 
+ TrackS=.T.
+ 
+ RefS=.t.
+ 
+ TcheckS=.T.
+ 
+ CathodeS=.t.
+ 
+ High_res=.T 
+
+ !Q_Schottky=0.1
+
+ C_EmitS = True
+
+Check_ref_part=f
+
+/
+
+
+&SCAN
+   
+ LScan=f
+  
+
+ Scan_para='Q_K(1)'
+ 
+ !Scan_para='MaxE(1)'
+
+ !Scan_para='MaxB(1)' 
+ 
+!Scan_para='MaxB(2)' 
+
+ !Scan_para='S_pos(1)'
+ 
+ S_min=1 S_max=5, S_numb=10
+ 
+ !S_zmin=4  S_zmax=5
+ 
+ !FOM(1)='hor.emit'
+ 
+ !FOM(2)='ver.tr.emit'
+ 
+! FOM(3)='hor.emit' 
+
+ FOM(4)='hor.spot'
+
+ FOM(5)='ver.spot'
+
+ !FOM(6)='rms energy'
+
+ !FOM(7)='momentum'
+
+ FOM(8)='charge'
+
+ FOM(9)='ver emit'
+
+ !FOM(10)='length'
+/
+
+
+
+&OUTPUT
+ 
+ ZSTART=0.7,	ZSTOP=5
+  
+ Zemit=100,       Zphase=20
+ 
+ RefS=T
+ 
+ EmitS=T,     PhaseS=T
+
+ Tr_EmitS=T, 
+
+ 
+/
+
+
+&CHARGE
+ 
+
+LSPCH=t
+ 
+ Nrad=9, Cell_var=2.0,	Nlong_in=21
+ 
+ min_grid=0.01
+ 
+ Max_Scale=0.01
+ 
+ Lmirror=t 
+
+
+/
+
+&CAVITY
+ 
+ LEField=t,
+ 
+ 
+ File_Efield(1)='Ez.dat',  C_pos(1)=0.0000, C_higher_order(1) = f
+ 
+ Nue(1)=0,	MaxE(1)=-0.0
+
+
+ File_Efield(2)='Ez.dat',  C_pos(2)=4.096, C_higher_order(2) = t
+ 
+ Nue(2)=0,	MaxE(2)=-1.1
+
+
+ File_Efield(3)='Ez.dat',  C_pos(3)=5.944, C_higher_order(3) = t
+
+/
+ 
+
+&SOLENOID
+ 
+LBField=t,
+ 
+ 
+File_Bfield(1)='Bz.dat', S_pos(1)=0.45
+ 
+MaxB(1)=-0.058,  S_smooth(1)=4
+
+ 
+File_Bfield(2)='Bz.dat', S_pos(2)=0.957
+ 
+MaxB(2)=0.039,  S_smooth(2)=4
+
+!previous - 0.49
+
+
+File_Bfield(3)='Bz.dat', S_pos(3)=2.107
+ 
+MaxB(3)=0.025,  S_smooth(3)=4
+
+
+File_Bfield(4)='Bz.dat', S_pos(4)=2.907
+ 
+MaxB(4)=0.044,  S_smooth(4)=4
+
+
+File_Bfield(5)='Bz.dat', S_pos(5)=3.670
+ 
+MaxB(5)=0.040,  S_smooth(5)=4
+
+
+File_Bfield(6)='Bz.dat', S_pos(6)=4.570
+
+MaxB(6)=0.0595,  S_smooth(6)=4
+
+
+File_Bfield(7)='Bz.dat', S_pos(7)=5.470
+ 
+MaxB(7)=0.059,  S_smooth(7)=4
+
+
+/
+
+
+
+
+
+&QUADRUPOLE
+
+LQUAD=f,
+
+Q_length(1)=0.2, Q_K(1)= 6.00,  Q_pos(1)=15.28, Q_bore(1)= 0.075,
+
+
+/
+
+
+
+&Aperture
+  Lapert=f
+  File_Aperture(1)='input/aperture.dat'
+
+/
+
+
+
+
+
+
