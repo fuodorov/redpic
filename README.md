@@ -1,6 +1,5 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 
-[![PyPI version](https://badge.fury.io/py/redpic.svg)](https://badge.fury.io/py/redpic)
 [![Check](https://github.com/fuodorov/redpic/actions/workflows/check.yml/badge.svg)](https://github.com/fuodorov/redpic/actions/workflows/check.yml)
 [![Test](https://github.com/fuodorov/redpic/actions/workflows/test.yml/badge.svg)](https://github.com/fuodorov/redpic/actions/workflows/test.yml)
 [![Release](https://github.com/fuodorov/redpic/actions/workflows/release.yml/badge.svg)](https://github.com/fuodorov/redpic/actions/workflows/release.yml)
