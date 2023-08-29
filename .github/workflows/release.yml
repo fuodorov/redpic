@@ -24,43 +24,6 @@ jobs:
           draft: false
           prerelease: false
 
-  release_docs:
-    name: Release docs to GitHub pages
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v2
-
-      - name: Build docs
-        uses: fuodorov/sphinx-action@master
-        with:
-          docs-folder: "docs/"
-
-      - name: Create an artifact of the html output.
-        uses: actions/upload-artifact@v1
-        with:
-          name: Documentation HTML
-          path: docs/_build/html/
-
-      - name: Commit documentation changes
-        run: |
-          git clone https://github.com/fuodorov/redpic.git --branch gh-pages --single-branch gh-pages
-          cp -r docs/_build/html/* gh-pages/
-          cd gh-pages
-          touch .nojekyll
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Update documentation" -a || true
-
-      - name: Push documentation changes
-        uses: ad-m/github-push-action@master
-        with:
-          branch: gh-pages
-          directory: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
   release_manual:
     name: Release manual to GitHub
     needs: create_release
@@ -129,3 +92,41 @@ jobs:
           asset_path: dist/${{ env.name }}
           asset_name: ${{ env.name }}
           asset_content_type: application/zip
+
+  release_docs:
+    name: Release docs to GitHub pages
+    needs: release_library
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Build docs
+        uses: fuodorov/sphinx-action@master
+        with:
+          docs-folder: "docs/"
+
+      - name: Create an artifact of the html output.
+        uses: actions/upload-artifact@v1
+        with:
+          name: Documentation HTML
+          path: docs/_build/html/
+
+      - name: Commit documentation changes
+        run: |
+          git clone https://github.com/fuodorov/redpic.git --branch gh-pages --single-branch gh-pages
+          cp -r docs/_build/html/* gh-pages/
+          cd gh-pages
+          touch .nojekyll
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update documentation" -a || true
+
+      - name: Push documentation changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: gh-pages
+          directory: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
