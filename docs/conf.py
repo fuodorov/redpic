@@ -14,11 +14,14 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 import redpic
+import datetime
+
+today = datetime.date.today()
 
 # -- Project information -----------------------------------------------------
 
 project = redpic.config.PROJECT_NAME
-copyright = redpic.config.PROJECT_NAME
+copyright = f'{today.year}, {redpic.config.PROJECT_AUTHOR}'
 author = redpic.config.PROJECT_AUTHOR
 # The short X.Y version.
 version = redpic.config.PROJECT_VERSION
@@ -37,6 +40,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
     'nbsphinx',
+    'redpic',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
