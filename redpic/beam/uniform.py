@@ -3,17 +3,18 @@ import logging
 import numpy as np
 import pandas as pd
 
-from redpic.beam.base import BaseBeam
+from redpic.beam.base import BaseBeam, BeamDistributionType
 
 module_logger = logging.getLogger(__name__)
 
 
 class UniformBeam(BaseBeam):
+    distribution = BeamDistributionType.UNIFORM
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.distribution = "uniform"
 
-    def generate(self, n: int, **kwargs) -> None:
+    def generate(self, *, n: int = 0, file_name: str = "", **kwargs) -> None:
         assert n > 0, "The number of particles (n) must be a positive number!"
         module_logger.info("Generate a beam with a given distribution")
         dpz = kwargs.get("dpz", 0.01)

@@ -10,7 +10,16 @@ from redpic import constants as const
 module_logger = logging.getLogger(__name__)
 
 
+class BeamDistributionType:
+    NONE = "none"
+    UNIFORM = "uniform"
+    GAUSSIAN = "gaussian"
+    ASTRA = "astra"
+
+
 class BaseBeam(ABC, kv.Beam):
+    distribution: BeamDistributionType = BeamDistributionType.NONE
+
     def __init__(
         self,
         *,
@@ -51,7 +60,6 @@ class BaseBeam(ABC, kv.Beam):
             yp=yp,
         )
         self.type = type  # particles type
-        self.distribution = ""
         self.n = 0.0  # quantity
         self.df = pd.DataFrame  # data frame
         self.da = np.array
@@ -62,93 +70,27 @@ class BaseBeam(ABC, kv.Beam):
         )  # beam charge
 
     @abstractmethod
-    def generate(self, n: int, **kwargs) -> None:
+    def generate(self, *, n: int = 0, file_name: str = "", **kwargs) -> None:
         pass
 
-    def _read_distribution_file(self, fname):
-        module_logger.info("Read distribution from file")
-        df = pd.read_csv(fname, dtype="float32")
-        return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
-
-    def _read_distribution_astra(self, fname):
-        module_logger.info("Read distribution from Astra file")
-
-        cols = ["x", "y", "z", "px", "py", "pz", "clock", "charge", "id", "flag"]
-        #        m    m    m    eV/c  eV/c  eV/c  ns       nC
-        df = pd.read_csv(fname, header=None, delim_whitespace=True, names=cols, dtype="float32")
-
-        df = df[df.flag != -15]  # ignore the lost particles
-        df["px"] = df["px"] / 1e6  # MeV/c
-        df["py"] = df["py"] / 1e6  # MeV/c
-
-        # remove the reference particle
-        df0 = df.head(1)
-        df = df.drop(df0.index)
-
-        z0 = df0.z.values[0]
-        pz0 = df0.pz.values[0]
-
-        # Recalculate z and pz:
-        df["z"] = z0 + df["clock"] * 1e-9 * const.c  # m
-        df["pz"] = (pz0 + df["pz"]) / 1e6  # MeV/c
-        return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
-
-    def upload(self, file_name: str):
-        module_logger.info("Particle loading")
-        file_extension = file_name.split(".")[-1]
-
-        if file_extension == "ini":
-            x, y, z, px, py, pz = self._read_distribution_astra(file_name)
-            self.n = int(len(x))
-            self.da = np.row_stack((x, y, z, px, py, pz))
-            self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
-        if file_extension == "csv":
-            x, y, z, px, py, pz = self._read_distribution_file(file_name)
-            self.n = int(len(x))
-            self.da = np.row_stack((x, y, z, px, py, pz))
-            self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
-
     def __str__(self):
-        self.description = (
-            "Beam parameters:"
-            + "\n"
-            + "\tType\t"
-            + (self.type.name)
-            + "\n"
-            + "\tDistribution\t"
-            + (self.distribution)
-            + "\n"
-            + "\tParticles\t%0.0f" % (self.n)
-            + "\n"
-            + "\tCurrent\t%0.0f A" % (self.current)
-            + "\n"
-            + "\tEnergy\t%0.3f MeV" % (self.energy)
-            + "\n"
-            + "\tTotal momentum\t%0.3f MeV/c" % (self.momentum)
-            + "\n"
-            + "\tRel. factor\t%0.3f" % (self.gamma)
-            + "\n"
-            + "\tRadius x\t%0.1f mm" % (self.radius_x * 1e3)
-            + "\n"
-            + "\tRadius y\t%0.1f mm" % (self.radius_y * 1e3)
-            + "\n"
-            + "\tRadius z\t%0.1f m" % (self.radius_z)
-            + "\n"
-            + "\tRadius x prime\t%0.1f mrad" % (self.radius_xp * 1e3)
-            + "\n"
-            + "\tRadius y prime\t%0.1f mrad" % (self.radius_yp * 1e3)
-            + "\n"
-            + "\tHorizontal centroid position\t%0.1f mm" % (self.x * 1e3)
-            + "\n"
-            + "\tVertical centroid position\t%0.1f mm" % (self.y * 1e3)
-            + "\n"
-            + "\tHorizontal centroid angle\t%0.1f mrad" % (self.xp * 1e3)
-            + "\n"
-            + "\tVertical centroid angle\t%0.1f mrad" % (self.yp * 1e3)
-            + "\n"
-            + "\tNormalized emittance x\t%0.1f mm*mrad" % (self.normalized_emittance_x * 1e6)
-            + "\n"
-            + "\tNormalized emittance y\t%0.1f mm*mrad" % (self.normalized_emittance_y * 1e6)
-            + "\n"
-        )
-        return self.description
+        return f"""Beam parameters:
+            Type\t{self.type.name}
+            Distribution\t{self.distribution}
+            Particles\t{self.n}
+            Current\t{self.current} A
+            Energy\t{self.energy} MeV
+            Total momentum\t{self.momentum} MeV/c
+            Rel. factor\t{self.gamma}
+            Radius x\t{self.radius_x * 1e3} mm
+            Radius y\t{self.radius_y * 1e3} mm
+            Radius z\t{self.radius_z} m
+            Radius x prime\t{self.radius_xp * 1e3} mrad
+            Radius y prime\t{self.radius_yp * 1e3} mrad
+            Horizontal centroid position\t{self.x * 1e3} mm
+            Vertical centroid position\t{self.y * 1e3} mm
+            Horizontal centroid angle\t{self.xp * 1e3} mrad
+            Vertical centroid angle\t{self.yp * 1e3} mrad
+            Normalized emittance x\t{self.normalized_emittance_x * 1e6} mm*mrad
+            Normalized emittance y\t{self.normalized_emittance_y * 1e6} mm*mrad
+        """
