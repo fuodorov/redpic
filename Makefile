@@ -20,7 +20,7 @@ release: ## release package on pypi
 	python3 -m twine upload dist/*
 
 test: ## run test
-	python3 -m pytest tests/functional/src
+	python3 -m pytest --cov=redpic --cov-report term-missing tests/functional/src
 
 help: ## Show help message
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
