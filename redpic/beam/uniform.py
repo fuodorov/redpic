@@ -15,10 +15,9 @@ class UniformBeam(BaseBeam):
         super().__init__(**kwargs)
 
     def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
-        assert n > 0, "The number of particles (n) must be a positive number!"
-        module_logger.info("Generate a beam with a given distribution")
+        super().generate(n, file_name=file_name, **kwargs)
+        module_logger.info("Generate a %s beam with %d particles", self.distribution, n)
         dpz = kwargs.get("dpz", 0.01)
-
         self.n = n
         s = np.random.normal(0, 1, int(self.n))
         t = np.random.normal(0, 1, int(self.n))

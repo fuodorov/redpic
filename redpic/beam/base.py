@@ -65,13 +65,17 @@ class BaseBeam(ABC, kv.Beam):
         self.da = np.array
         self.radius_z = radius_z
         self.z = z
-        self.total_charge = (
-            2 * type.charge / abs(type.charge) * self.current * self.radius_z / const.c / self.beta
-        )  # beam charge
+        try:
+            self.total_charge = (
+                2 * type.charge / abs(type.charge) * self.current * self.radius_z / const.c / self.beta
+            )  # beam charge
+        except ZeroDivisionError:
+            self.total_charge = 0.0e0
 
     @abstractmethod
     def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
-        pass
+        if n < 0:
+            raise ValueError("The number of particles (n) must be a positive number!")
 
     def __str__(self):
         return f"""Beam parameters:

@@ -39,12 +39,12 @@ class AstraBeam(BaseBeam):
         return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
 
     def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
-        module_logger.info("Particle loading")
+        super().generate(n, file_name=file_name, **kwargs)
+        if file_name.split(".")[-1] != "ini":
+            raise ValueError("The file format is not supported! Astra file should be .ini")
 
-        if file_name.split(".")[-1] == "ini":
-            x, y, z, px, py, pz = self._read_astra_particles(file_name)
-            self.n = int(len(x))
-            self.da = np.row_stack((x, y, z, px, py, pz))
-            self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
-        else:
-            raise ValueError("The file format is not supported!")
+        module_logger.info("Particle loading from Astra %s file", file_name)
+        x, y, z, px, py, pz = self._read_astra_particles(file_name)
+        self.n = int(len(x))
+        self.da = np.row_stack((x, y, z, px, py, pz))
+        self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
