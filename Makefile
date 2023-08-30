@@ -22,5 +22,9 @@ release: ## release package on pypi
 test: ## run test
 	python3 -m pytest --cov=redpic --cov-report term-missing tests/functional/src
 
+profiler: ## run profiler for pytest
+	python3 -m cProfile -o profile -m pytest tests/functional/src/
+	python3 -c "import pstats; pstats.Stats('profile').strip_dirs().sort_stats('tottime').print_stats(50)"
+
 help: ## Show help message
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
