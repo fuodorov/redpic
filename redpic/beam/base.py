@@ -13,6 +13,7 @@ module_logger = logging.getLogger(__name__)
 class BeamDistributionType:
     NONE = "none"
     UNIFORM = "uniform"
+    RADIAL_UNIFORM = "radial-uniform"
     GAUSSIAN = "gaussian"
     ASTRA = "astra"
 
@@ -78,6 +79,7 @@ class BaseBeam(ABC, kv.Beam):
     def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
         if n < 0:
             raise ValueError("The number of particles (n) must be a positive number!")
+        module_logger.info("Generate a %s beam with %d particles", self.distribution, n)
         self._generate(n, file_name=file_name, **kwargs)
 
     def __str__(self):
