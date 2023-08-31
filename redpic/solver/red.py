@@ -4,7 +4,7 @@ from numba import jit, prange
 
 from redpic import constants as const
 from redpic.solver.base import BaseSimulation
-from redpic.solver.utils import get_field_accelerator, get_field_beam
+from redpic.utils.field import get_field_accelerator, get_field_beam
 
 
 class REDSimulation(BaseSimulation):
