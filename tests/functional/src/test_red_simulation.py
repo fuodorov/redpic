@@ -10,16 +10,18 @@ from tests.functional.utils.astra import read_track_astra_particles
 
 @pytest.fixture
 def test_accelerator():
+    accel_path = "tests/functional/test_data/data/fields/Ez.dat"
+    solenoid_path = "tests/functional/test_data/data/fields/Bz.dat"
     acc = Accelerator(0.7, 1.7, 0.01)
-    acc.add_accel("Acc. 1", 4.096, -1.1, "tests/functional/test_data/data/fields/Ez.dat")
-    acc.add_accel("Acc. 2", 5.944, -1.1, "tests/functional/test_data/data/fields/Ez.dat")
-    acc.add_solenoid("Sol. 1", 0.450, -0.0580, "tests/functional/test_data/data/fields/Bz.dat")
-    acc.add_solenoid("Sol. 2", 0.957, 0.0390, "tests/functional/test_data/data/fields/Bz.dat")
-    acc.add_solenoid("Sol. 3", 2.107, 0.0250, "tests/functional/test_data/data/fields/Bz.dat")
-    acc.add_solenoid("Sol. 4", 2.907, 0.0440, "tests/functional/test_data/data/fields/Bz.dat")
-    acc.add_solenoid("Sol. 5", 3.670, 0.0400, "tests/functional/test_data/data/fields/Bz.dat")
-    acc.add_solenoid("Sol. 6", 4.570, 0.0595, "tests/functional/test_data/data/fields/Bz.dat")
-    acc.add_solenoid("Sol. 7", 5.470, 0.0590, "tests/functional/test_data/data/fields/Bz.dat")
+    acc.add_accel("Acc. 1", 4.096, -1.1, accel_path)
+    acc.add_accel("Acc. 2", 5.944, -1.1, accel_path)
+    acc.add_solenoid("Sol. 1", 0.450, -0.0580, solenoid_path)
+    acc.add_solenoid("Sol. 3", 2.107, 0.0250, solenoid_path)
+    acc.add_solenoid("Sol. 2", 0.957, 0.0390, solenoid_path)
+    acc.add_solenoid("Sol. 4", 2.907, 0.0440, solenoid_path)
+    acc.add_solenoid("Sol. 5", 3.670, 0.0400, solenoid_path)
+    acc.add_solenoid("Sol. 6", 4.570, 0.0595, solenoid_path)
+    acc.add_solenoid("Sol. 7", 5.470, 0.0590, solenoid_path)
     acc.compile()
     return acc
 
