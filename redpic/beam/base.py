@@ -72,9 +72,14 @@ class BaseBeam(ABC, kv.Beam):
         )
 
     @abstractmethod
+    def _generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
+        pass
+
     def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
         if n < 0:
             raise ValueError("The number of particles (n) must be a positive number!")
+        
+        self._generate(n, file_name=file_name, **kwargs)
 
     def __str__(self):
         return f"""Beam parameters:

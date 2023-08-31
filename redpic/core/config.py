@@ -6,7 +6,7 @@ logging_config.dictConfig(LOGGING)
 
 NAME = "redpic"
 
-VERSION = "0.7.52"
+VERSION = "0.7.53"
 
 AUTHOR = "Vyacheslav Fedorov"
 

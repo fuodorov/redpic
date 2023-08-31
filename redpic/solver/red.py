@@ -86,9 +86,7 @@ class REDSimulation(BaseSimulation):
                 z[i] += vz
         return x, y, z, px, py, pz
 
-    def track(self, *, n_files: int = 20) -> None:
-        assert n_files > 0, "The number of files (n_files) must be a positive number!"
-
+    def _track(self, *, n_files: int = 20) -> None:
         # Init parameterss
         Y = self.beam.da
         Y[2] = Y[2] + self.acc.z_start - max(Y[2])  # set initial beam position

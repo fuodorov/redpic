@@ -11,11 +11,7 @@ module_logger = logging.getLogger(__name__)
 class UniformBeam(BaseBeam):
     distribution = BeamDistributionType.UNIFORM
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
-        super().generate(n, file_name=file_name, **kwargs)
+    def _generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
         module_logger.info("Generate a %s beam with %d particles", self.distribution, n)
         dpz = kwargs.get("dpz", 0.01)
         self.n = n

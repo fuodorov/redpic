@@ -7,11 +7,8 @@ from redpic.beam import BaseBeam
 
 
 class BaseBeamTest(BaseBeam):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
-        super().generate(n, file_name=file_name, **kwargs)
+    def _generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
+        pass
 
 
 @pytest.mark.parametrize(

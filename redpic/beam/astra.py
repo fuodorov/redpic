@@ -38,8 +38,7 @@ class AstraBeam(BaseBeam):
         df["pz"] = (pz0 + df["pz"]) / 1e6  # MeV/c
         return df["x"], df["y"], df["z"], df["px"], df["py"], df["pz"]
 
-    def generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
-        super().generate(n, file_name=file_name, **kwargs)
+    def _generate(self, n: int = 0, *, file_name: str = "", **kwargs) -> None:
         if file_name.split(".")[-1] != "ini":
             raise ValueError("The file format is not supported! Astra file should be .ini")
 
