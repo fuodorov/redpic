@@ -1,7 +1,7 @@
 # Relativistic Difference Scheme Particles-In-Cell (REDPIC)
 
-![PyPI - Version](https://img.shields.io/pypi/v/redpic?color=blue)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/redpic?color=blue)
+[![PyPI - Version](https://img.shields.io/pypi/v/redpic?color=blue)](https://pypi.org/project/redpic/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/redpic?color=blue)](https://pypi.org/project/redpic/)
 
 [![Check](https://github.com/fuodorov/redpic/actions/workflows/check.yml/badge.svg)](https://github.com/fuodorov/redpic/actions/workflows/check.yml)
 [![Test](https://github.com/fuodorov/redpic/actions/workflows/test.yml/badge.svg)](https://github.com/fuodorov/redpic/actions/workflows/test.yml)
