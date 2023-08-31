@@ -27,6 +27,7 @@ You can then see the section :doc:`install/installation` and
   install/installation
   tutorial/tutorial
   test/test
+  perfomance/perfomance
 
 Contributing to REDPIC
 ----------------------
