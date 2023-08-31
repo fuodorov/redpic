@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: deps lint format release test help
+.PHONY: deps lint format release test profiler help
 
 REPO_ROOT:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
