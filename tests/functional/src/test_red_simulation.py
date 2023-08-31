@@ -4,7 +4,7 @@ from scipy import stats
 from redpic import constants as const
 from redpic.accelerator import Accelerator
 from redpic.beam import AstraBeam
-from redpic.solver import Simulation
+from redpic.solver import REDSimulation
 from tests.functional.utils.astra import read_track_astra_particles
 
 
@@ -44,8 +44,8 @@ def test_beam():
     return beam
 
 
-def test_simulation_vs_astra(test_beam, test_accelerator):
-    redpic_sim = Simulation(test_beam, test_accelerator)
+def test_red_simulation_vs_astra(test_beam, test_accelerator):
+    redpic_sim = REDSimulation(test_beam, test_accelerator)
     redpic_sim.track()
     redpic_df = redpic_sim.result[list(redpic_sim.result.keys())[-1]]
     astra_df = read_track_astra_particles("tests/functional/test_data/data/astra/track.data")
