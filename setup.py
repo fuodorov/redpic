@@ -9,14 +9,14 @@ with open("requirements/base.txt", "r", encoding="utf-8") as fh:
     required = fh.read().splitlines()
 
 setup(
-    name=config.PROJECT_NAME,
-    version=config.PROJECT_VERSION,
-    author=config.PROJECT_AUTHOR,
-    author_email=config.PROJECT_AUTHOR_EMAIL,
-    description=config.PROJECT_DOC,
+    name=config.REDPIC_NAME,
+    version=config.REDPIC_VERSION,
+    author=config.REDPIC_AUTHOR,
+    author_email=config.REDPIC_AUTHOR_EMAIL,
+    description=config.REDPIC_DOC,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url=config.PROJECT_URL,
+    url=config.REDPIC_URL,
     packages=find_packages(),
     install_requires=required,
     classifiers=[

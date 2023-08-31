@@ -4,14 +4,14 @@ from redpic.core.logger import LOGGING
 
 logging_config.dictConfig(LOGGING)
 
-PROJECT_NAME = "redpic"
+REDPIC_NAME = "redpic"
 
-PROJECT_VERSION = "0.7.50"
+REDPIC_VERSION = "0.7.51"
 
-PROJECT_AUTHOR = "Vyacheslav Fedorov"
+REDPIC_AUTHOR = "Vyacheslav Fedorov"
 
-PROJECT_AUTHOR_EMAIL = "slava@fuodorov.ru"
+REDPIC_AUTHOR_EMAIL = "slava@fuodorov.ru"
 
-PROJECT_DOC = "Relativistic Difference Scheme Particle-in-Cell code (REDPIC)"
+REDPIC_DOC = "Relativistic Difference Scheme Particle-in-Cell code (REDPIC)"
 
-PROJECT_URL = "https://github.com/fuodorov/redpic"
+REDPIC_URL = "https://github.com/fuodorov/redpic"
