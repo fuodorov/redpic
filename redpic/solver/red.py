@@ -1,15 +1,16 @@
 import numpy as np
 import pandas as pd
-from numba import jit, prange
+from numba import prange
 
 from redpic import constants as const
 from redpic.solver.base import BaseSimulation
 from redpic.utils.field import get_field_accelerator, get_field_beam
+from redpic.utils.jit import jit
 
 
 class REDSimulation(BaseSimulation):
     @staticmethod
-    @jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
+    @jit
     def _first_step_red(
         x: np.array,
         y: np.array,
@@ -43,7 +44,7 @@ class REDSimulation(BaseSimulation):
         return x, y, z, px, py, pz
 
     @staticmethod
-    @jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
+    @jit
     def _second_step_red(
         x: np.array,
         y: np.array,

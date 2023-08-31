@@ -1,10 +1,11 @@
 import numpy as np
-from numba import jit, prange
+from numba import prange
 from scipy import misc
 
 from redpic import constants as const
 from redpic.accelerator import Accelerator
 from redpic.beam.base import BaseBeam
+from redpic.utils.jit import jit
 
 
 def get_field_accelerator(
@@ -42,7 +43,7 @@ def get_field_accelerator(
         return Bx, By, Bz
 
 
-@jit(nopython=True, parallel=True, fastmath=True, cache=True, nogil=True)
+@jit
 def sum_field_particles(
     x: np.array, y: np.array, z: np.array, z_start: float, z_stop: float
 ) -> (np.array, np.array, np.array):

@@ -20,13 +20,13 @@ today = datetime.date.today()
 
 # -- Project information -----------------------------------------------------
 
-project = redpic.config.REDPIC_NAME
-copyright = f'{today.year}, {redpic.config.REDPIC_AUTHOR}'
-author = redpic.config.REDPIC_AUTHOR
+project = redpic.config.NAME
+copyright = f'{today.year}, {redpic.config.AUTHOR}'
+author = redpic.config.AUTHOR
 # The short X.Y version.
-version = redpic.config.REDPIC_VERSION
+version = redpic.config.VERSION
 # The full version, including alpha/beta/rc tags.
-release = redpic.config.REDPIC_VERSION
+release = redpic.config.VERSION
 
 # -- General configuration ---------------------------------------------------
 
