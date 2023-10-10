@@ -12,7 +12,7 @@ class BaseSimulation(ABC):
         self.beam = beam
         self.acc = accelerator
         self.result = {}
-    
+
     @abstractmethod
     def _track(self, *, n_files: int) -> None:
         pass

@@ -117,9 +117,7 @@ class REDSimulation(BaseSimulation):
                 Ex, Ey, Ez = Ex + ex, Ey + ey, Ez + ez
 
             # first step RED
-            self._first_step_red(
-                Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz
-            )
+            self._first_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz)
             gamma = np.sqrt(1 + Y[3] * Y[3] + Y[4] * Y[4] + Y[5] * Y[5])
             vz = Y[5] / gamma
 
@@ -134,9 +132,7 @@ class REDSimulation(BaseSimulation):
                 Bx, By, Bz = Bx + bx, By + by, Bz + bz
 
             # second step RED
-            self._second_step_red(
-                Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz
-            )
+            self._second_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz)
             gamma = np.sqrt(1 + Y[3] * Y[3] + Y[4] * Y[4] + Y[5] * Y[5])
             vz = Y[5] / gamma
 

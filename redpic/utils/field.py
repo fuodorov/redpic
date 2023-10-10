@@ -1,10 +1,11 @@
 import numpy as np
-from numba import prange
+from numba import cuda, prange
 from scipy import misc
 
 from redpic import constants as const
 from redpic.accelerator import Accelerator
 from redpic.beam.base import BaseBeam
+from redpic.core import config as cfg
 from redpic.utils.jit import jit
 
 
@@ -46,11 +47,27 @@ def sum_field_particles(
 ) -> None:
     for i in prange(int(len(x))):  # pylint: disable=E1133
         if z_start <= z[i] <= z_stop:
-            for j in range(int(len(x))):  # pylint: disable=E1133
+            for j in range(int(len(x))):
                 if z_start <= z[j] <= z_stop and i != j:
                     Fx[i] += (x[i] - x[j]) / ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2 + (z[j] - z[i]) ** 2) ** (3 / 2)
                     Fy[i] += (y[i] - y[j]) / ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2 + (z[j] - z[i]) ** 2) ** (3 / 2)
                     Fz[i] += (z[i] - z[j]) / ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2 + (z[j] - z[i]) ** 2) ** (3 / 2)
+
+
+@jit
+def sum_field_particles_cuda(
+    x: np.array, y: np.array, z: np.array, z_start: float, z_stop: float, Fx: np.array, Fy: np.array, Fz: np.array
+) -> None:
+    i = cuda.grid(1)  # pylint: disable=no-value-for-parameter
+
+    if i >= x.size:
+        return
+
+    for j in range(x.size):
+        if z_start <= z[i] <= z_stop and z_start <= z[j] <= z_stop and i != j:
+            Fx[i] += (x[i] - x[j]) / ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2 + (z[j] - z[i]) ** 2) ** (3 / 2)
+            Fy[i] += (y[i] - y[j]) / ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2 + (z[j] - z[i]) ** 2) ** (3 / 2)
+            Fz[i] += (z[i] - z[j]) / ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2 + (z[j] - z[i]) ** 2) ** (3 / 2)
 
 
 def get_field_beam(
@@ -58,7 +75,13 @@ def get_field_beam(
 ) -> (np.array, np.array, np.array):
     q = beam.total_charge / beam.n
     Fx, Fy, Fz = np.zeros(beam.n), np.zeros(beam.n), np.zeros(beam.n)
-    sum_field_particles(x, y, z, acc.z_start, acc.z_stop, Fx, Fy, Fz)
+
+    if cfg.ENABLE_CUDA:
+        sum_field_particles_cuda[beam.n // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK](
+            x, y, z, acc.z_start, acc.z_stop, Fx, Fy, Fz
+        )
+    else:
+        sum_field_particles(x, y, z, acc.z_start, acc.z_stop, Fx, Fy, Fz)
 
     if type == "E":
         k = const.ke / (4 * np.pi) * q
