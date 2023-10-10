@@ -63,7 +63,7 @@ def test_red_simulation_vs_astra(test_beam, test_accelerator):
     assert stats.ks_2samp(redpic_df["y"], astra_df["y"]).pvalue > 0.01
 
 
-def tect_cuda_red_simulation_vs_astra(test_beam, test_accelerator):
+def test_cuda_red_simulation_vs_astra(test_beam, test_accelerator):
     if numba.cuda.is_available():
         cfg.ENABLE_CUDA = True
         test_red_simulation_vs_astra(test_beam, test_accelerator)
