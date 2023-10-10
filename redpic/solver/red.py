@@ -23,9 +23,8 @@ class REDSimulation(BaseSimulation):
         Fz: np.array,
         z_start: float,
         z_stop: float,
-    ) -> (np.array, np.array, np.array, np.array, np.array, np.array):
-        n = int(len(x))
-        for i in prange(n):  # pylint: disable=E1133
+    ) -> None:
+        for i in prange(int(len(x))):  # pylint: disable=E1133
             if z_start <= z[i] <= z_stop:
                 px[i] += 2 * Fx[i]
                 py[i] += 2 * Fy[i]
@@ -41,7 +40,6 @@ class REDSimulation(BaseSimulation):
                 gamma = (1 + px[i] ** 2 + py[i] ** 2 + pz[i] ** 2) ** (1 / 2)
                 vz = pz[i] / gamma
                 z[i] += vz
-        return x, y, z, px, py, pz
 
     @staticmethod
     @jit
@@ -57,9 +55,8 @@ class REDSimulation(BaseSimulation):
         Fz: np.array,
         z_start: float,
         z_stop: float,
-    ) -> (np.array, np.array, np.array, np.array, np.array, np.array):
-        n = int(len(x))
-        for i in prange(n):  # pylint: disable=E1133
+    ) -> None:
+        for i in prange(int(len(x))):  # pylint: disable=E1133
             if z_start <= z[i] <= z_stop:
                 gamma = (1 + px[i] ** 2 + py[i] ** 2 + pz[i] ** 2) ** (1 / 2)
                 vx = px[i] / gamma
@@ -84,7 +81,6 @@ class REDSimulation(BaseSimulation):
                 gamma = (1 + px[i] ** 2 + py[i] ** 2 + pz[i] ** 2) ** (1 / 2)
                 vz = pz[i] / gamma
                 z[i] += vz
-        return x, y, z, px, py, pz
 
     def _track(self, *, n_files: int = 20) -> None:
         # Init parameterss
@@ -121,7 +117,7 @@ class REDSimulation(BaseSimulation):
                 Ex, Ey, Ez = Ex + ex, Ey + ey, Ez + ez
 
             # first step RED
-            Y[0], Y[1], Y[2], Y[3], Y[4], Y[5] = self._first_step_red(
+            self._first_step_red(
                 Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz
             )
             gamma = np.sqrt(1 + Y[3] * Y[3] + Y[4] * Y[4] + Y[5] * Y[5])
@@ -138,7 +134,7 @@ class REDSimulation(BaseSimulation):
                 Bx, By, Bz = Bx + bx, By + by, Bz + bz
 
             # second step RED
-            Y[0], Y[1], Y[2], Y[3], Y[4], Y[5] = self._second_step_red(
+            self._second_step_red(
                 Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz
             )
             gamma = np.sqrt(1 + Y[3] * Y[3] + Y[4] * Y[4] + Y[5] * Y[5])
