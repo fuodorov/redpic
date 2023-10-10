@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
-from numba import prange
+from numba import cuda, prange
 
 from redpic import constants as const
+from redpic.core import config as cfg
 from redpic.solver.base import BaseSimulation
 from redpic.utils.field import get_field_accelerator, get_field_beam
 from redpic.utils.jit import jit
@@ -40,6 +41,38 @@ class REDSimulation(BaseSimulation):
                 gamma = (1 + px[i] ** 2 + py[i] ** 2 + pz[i] ** 2) ** (1 / 2)
                 vz = pz[i] / gamma
                 z[i] += vz
+
+    @staticmethod
+    @cuda.jit
+    def _first_step_red_cuda(
+        x: np.array,
+        y: np.array,
+        z: np.array,
+        px: np.array,
+        py: np.array,
+        pz: np.array,
+        Fx: np.array,
+        Fy: np.array,
+        Fz: np.array,
+        z_start: float,
+        z_stop: float,
+    ) -> None:
+        i = cuda.grid(1)  # pylint: disable=no-value-for-parameter
+        if z_start <= z[i] <= z_stop and i < x.size:
+            px[i] += 2 * Fx[i]
+            py[i] += 2 * Fy[i]
+            pz[i] += 2 * Fz[i]
+            gamma = (1 + px[i] ** 2 + py[i] ** 2 + pz[i] ** 2) ** (1 / 2)
+            vx = px[i] / gamma
+            vy = py[i] / gamma
+            vz = pz[i] / gamma
+            x[i] += vx
+            y[i] += vy
+            z[i] += vz
+        else:
+            gamma = (1 + px[i] ** 2 + py[i] ** 2 + pz[i] ** 2) ** (1 / 2)
+            vz = pz[i] / gamma
+            z[i] += vz
 
     @staticmethod
     @jit
@@ -82,6 +115,47 @@ class REDSimulation(BaseSimulation):
                 vz = pz[i] / gamma
                 z[i] += vz
 
+    @staticmethod
+    @cuda.jit
+    def _second_step_red_cuda(
+        x: np.array,
+        y: np.array,
+        z: np.array,
+        px: np.array,
+        py: np.array,
+        pz: np.array,
+        Fx: np.array,
+        Fy: np.array,
+        Fz: np.array,
+        z_start: float,
+        z_stop: float,
+    ) -> None:
+        i = cuda.grid(1)  # pylint: disable=no-value-for-parameter
+        if z_start <= z[i] <= z_stop and i < x.size:
+            gamma = (1 + px[i] ** 2 + py[i] ** 2 + pz[i] ** 2) ** (1 / 2)
+            vx = px[i] / gamma
+            vy = py[i] / gamma
+            vz = pz[i] / gamma
+            b2 = 1 + Fx[i] ** 2 + Fy[i] ** 2 + Fz[i] ** 2
+            b1 = 2 - b2
+            b3 = 2 * (vx * Fx[i] + vy * Fy[i] + vz * Fz[i])
+            fx = 2 * (vy * Fz[i] - vz * Fy[i])
+            fy = 2 * (vz * Fx[i] - vx * Fz[i])
+            fz = 2 * (vx * Fy[i] - vy * Fx[i])
+            vx = (vx * b1 + fx + Fx[i] * b3) / b2
+            vy = (vy * b1 + fy + Fy[i] * b3) / b2
+            vz = (vz * b1 + fz + Fz[i] * b3) / b2
+            x[i] += vx
+            y[i] += vy
+            z[i] += vz
+            px[i] = vx * gamma
+            py[i] = vy * gamma
+            pz[i] = vz * gamma
+        else:
+            gamma = (1 + px[i] ** 2 + py[i] ** 2 + pz[i] ** 2) ** (1 / 2)
+            vz = pz[i] / gamma
+            z[i] += vz
+
     def _track(self, *, n_files: int = 20) -> None:
         # Init parameterss
         Y = self.beam.da
@@ -117,7 +191,12 @@ class REDSimulation(BaseSimulation):
                 Ex, Ey, Ez = Ex + ex, Ey + ey, Ez + ez
 
             # first step RED
-            self._first_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz)
+            if cfg.ENABLE_CUDA:
+                self._first_step_red_cuda[self.beam.n // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK](
+                    Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz
+                )
+            else:
+                self._first_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz)
             gamma = np.sqrt(1 + Y[3] * Y[3] + Y[4] * Y[4] + Y[5] * Y[5])
             vz = Y[5] / gamma
 
@@ -132,7 +211,12 @@ class REDSimulation(BaseSimulation):
                 Bx, By, Bz = Bx + bx, By + by, Bz + bz
 
             # second step RED
-            self._second_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz)
+            if cfg.ENABLE_CUDA:
+                self._second_step_red_cuda[self.beam.n // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK](
+                    Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz
+                )
+            else:
+                self._second_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz)
             gamma = np.sqrt(1 + Y[3] * Y[3] + Y[4] * Y[4] + Y[5] * Y[5])
             vz = Y[5] / gamma
 
