@@ -1,5 +1,6 @@
 [FORMAT]
 max-line-length=120
+max-statements=100
 
 [MASTER]
 disable=

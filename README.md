@@ -22,6 +22,7 @@ For particle dynamics simulation using finite difference scheme relativistic.
     -   [Documentation](#documentation)
         -   [Adding a new section](#adding-a-new-section)
     -   [Additional resources](#additional-resources)
+    -   [CUDA installation](#cuda-installation)
 -   [Prerequisites](#prerequisites)
     -   [Latex](#latex)
 -   [Useful Resources](#useful-resources)
@@ -71,6 +72,11 @@ Rename the pasted file (e.g. first_chapter.tex) and add this file to [main.tex](
 Alternatively you can find great resources on the 
 [Overleaf Tutorial website](https://www.overleaf.com/learn/latex/Tutorials) or on 
 [Latex wikibooks](https://en.wikibooks.org/wiki/LaTeX).
+
+### CUDA installation
+
+For CUDA implementation we use [Numba](https://numba.pydata.org) library.
+For more information about CUDA installation see [Numba CUDA installation guide](https://numba.pydata.org/numba-doc/dev/cuda/overview.html#installing-cuda).
 
 ## Prerequisites
 

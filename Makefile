@@ -26,5 +26,8 @@ profiler: ## run profiler for pytest
 	python3 -m cProfile -o profile -m pytest tests/functional/src/
 	python3 -c "import pstats; pstats.Stats('profile').strip_dirs().sort_stats('tottime').print_stats(10)"
 
+cuda_profiler: ## run cuda nvprof profiler for pytest
+	nvprof --profile-child-processes -f -o profile_%p.nvvp python -m pytest tests/functional/src
+
 help: ## Show help message
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done

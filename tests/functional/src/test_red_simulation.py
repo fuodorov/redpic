@@ -1,9 +1,11 @@
+import numba
 import pytest
 from scipy import stats
 
 from redpic import constants as const
 from redpic.accelerator import Accelerator
 from redpic.beam import AstraBeam
+from redpic.core import config as cfg
 from redpic.solver import REDSimulation
 from tests.functional.utils.astra import read_track_astra_particles
 
@@ -59,3 +61,9 @@ def test_red_simulation_vs_astra(test_beam, test_accelerator):
 
     assert stats.ks_2samp(redpic_df["x"], astra_df["x"]).pvalue > 0.01
     assert stats.ks_2samp(redpic_df["y"], astra_df["y"]).pvalue > 0.01
+
+
+def test_cuda_red_simulation_vs_astra(test_beam, test_accelerator):
+    if numba.cuda.is_available():
+        cfg.ENABLE_CUDA = True
+        test_red_simulation_vs_astra(test_beam, test_accelerator)
