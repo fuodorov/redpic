@@ -54,6 +54,7 @@ def sum_field_particles(
                     Fz[i] += (z[i] - z[j]) / ((x[j] - x[i]) ** 2 + (y[j] - y[i]) ** 2 + (z[j] - z[i]) ** 2) ** (3 / 2)
 
 
+# ToDo: https://stackoverflow.com/questions/61542603/electric-force-between-particles-using-numpy-arrays
 @cuda.jit
 def sum_field_particles_cuda(
     x: np.array, y: np.array, z: np.array, z_start: float, z_stop: float, Fx: np.array, Fy: np.array, Fz: np.array
