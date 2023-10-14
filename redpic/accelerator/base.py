@@ -353,7 +353,7 @@ class Accelerator:
             Element rotation in the z-y plane
 
         frequency: float, optional
-            Frequency of the element, [Hz]
+            Frequency of the element, [GHz]
         phase: float, optional
             Phase of the element, [rad]
         """
@@ -399,7 +399,7 @@ class Accelerator:
             Element rotation in the z-y plane
 
         frequency: float, optional
-            Frequency of the element, [Hz]
+            Frequency of the element, [GHz]
         phase: float, optional
             Phase of the element, [rad]
         """
