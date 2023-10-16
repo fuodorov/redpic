@@ -10,7 +10,7 @@ from redpic.utils.jit import jit
 
 
 def get_field_accelerator(
-    acc: Accelerator, type: str, x: np.array, y: np.array, z: np.array
+    acc: Accelerator, type: str, x: np.array, y: np.array, z: np.array, t: np.float64
 ) -> (np.array, np.array, np.array):
     dz = acc.dz
     offset_x = acc.Dx(z)
@@ -24,9 +24,10 @@ def get_field_accelerator(
         Ez = acc.Ez(z)
         dEzdz = acc.dEzdz(z)
         d2Ezdz2 = misc.derivative(acc.dEzdz, z, dx=dz, n=1)
-        Ez = Ez - d2Ezdz2 * r_corr * r_corr / 4  # row remainder
-        Ex = -dEzdz * x_corr / 2 + Ez * offset_xp  # row remainder
-        Ey = -dEzdz * y_corr / 2 + Ez * offset_yp  # row remainder
+        E_freq, E_phase = acc.E_freq(z) * 1e9, acc.E_phase(z)
+        Ez = (Ez - d2Ezdz2 * r_corr * r_corr / 4) * np.cos(2 * np.pi * E_freq * t + E_phase)
+        Ex = (-dEzdz * x_corr / 2 + Ez * offset_xp) * np.cos(2 * np.pi * E_freq * t + E_phase)
+        Ey = (-dEzdz * y_corr / 2 + Ez * offset_yp) * np.cos(2 * np.pi * E_freq * t + E_phase)
         return Ex, Ey, Ez
     if type == "B":
         Bx = acc.Bx(z)
@@ -34,10 +35,11 @@ def get_field_accelerator(
         Bz = acc.Bz(z)
         dBzdz = acc.dBzdz(z)
         d2Bzdz2 = misc.derivative(acc.dBzdz, z, dx=dz, n=1)
+        B_freq, B_phase = acc.B_freq(z) * 1e9, acc.B_phase(z)
         Gz = acc.Gz(z)
-        Bz = Bz - d2Bzdz2 * r_corr * r_corr / 4  # row remainder
-        Bx = Bx + Gz * y_corr - dBzdz * x_corr / 2 + Bz * offset_xp  # row remainder
-        By = By + Gz * x_corr - dBzdz * y_corr / 2 + Bz * offset_yp  # row remainder
+        Bz = (Bz - d2Bzdz2 * r_corr * r_corr / 4) * np.cos(2 * np.pi * B_freq * t + B_phase)
+        Bx = (Bx - dBzdz * x_corr / 2 + Bz * offset_xp) * np.cos(2 * np.pi * B_freq * t + B_phase) + Gz * y_corr
+        By = (By - dBzdz * y_corr / 2 + Bz * offset_yp) * np.cos(2 * np.pi * B_freq * t + B_phase) + Gz * x_corr
         return Bx, By, Bz
 
 
