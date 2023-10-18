@@ -53,6 +53,8 @@ jobs:
     name: Release library to PyPI and GitHub
     needs: create_release
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 
     steps:
       - name: Checkout source
@@ -73,9 +75,6 @@ jobs:
 
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: ${{ secrets.PYPI_USERNAME }}
-          password: ${{ secrets.PYPI_PASSWORD }}
 
       - name: Get Asset name
         run: |
