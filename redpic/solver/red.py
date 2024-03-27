@@ -181,7 +181,7 @@ class REDSimulation(BaseSimulation):
             Y[3], Y[4], Y[5] = Y[3] / P0, Y[4] / P0, Y[5] / P0
 
             # get electric field from accelerator
-            Ex, Ey, Ez = get_field_accelerator(self.acc, "E", Y[0] * dz, Y[1] * dz, Y[2] * dz, t)
+            Ex, Ey, Ez = get_field_accelerator(self.acc, "E", Y[0] * dz, Y[1] * dz, Y[2] * dz)
             Ex, Ey, Ez = Ex / E0, Ey / E0, Ez / E0
 
             # get electric field from beam
@@ -201,7 +201,7 @@ class REDSimulation(BaseSimulation):
             vz = Y[5] / gamma
 
             # get magnetic field from accelerator
-            Bx, By, Bz = get_field_accelerator(self.acc, "B", Y[0] * dz, Y[1] * dz, Y[2] * dz, t)
+            Bx, By, Bz = get_field_accelerator(self.acc, "B", Y[0] * dz, Y[1] * dz, Y[2] * dz)
             Bx, By, Bz = Bx / B0 / gamma, By / B0 / gamma, Bz / B0 / gamma
 
             # get magnetic field from beam
