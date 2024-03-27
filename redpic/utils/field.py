@@ -25,9 +25,9 @@ def get_field_accelerator(
         dEzdz = acc.dEzdz(z)
         d2Ezdz2 = misc.derivative(acc.dEzdz, z, dx=dz, n=1)
         E_freq, E_phase = acc.E_freq(z) * 1e9, acc.E_phase(z)
-        Ez = (Ez - (d2Ezdz2 + Ez*(2 * np.pi * E_freq)**2/const.c**2) * r_corr * r_corr / 4) * np.sin(2 * np.pi * E_freq * t + E_phase)
-        Ex = (-dEzdz * x_corr / 2 + Ez * offset_xp) * np.sin(2 * np.pi * E_freq * t + E_phase)
-        Ey = (-dEzdz * y_corr / 2 + Ez * offset_yp) * np.sin(2 * np.pi * E_freq * t + E_phase)
+        Ez = (Ez - d2Ezdz2 * r_corr * r_corr / 4) * np.cos(2 * np.pi * E_freq * t + E_phase)
+        Ex = (-dEzdz * x_corr / 2 + Ez * offset_xp) * np.cos(2 * np.pi * E_freq * t + E_phase)
+        Ey = (-dEzdz * y_corr / 2 + Ez * offset_yp) * np.cos(2 * np.pi * E_freq * t + E_phase)
         return Ex, Ey, Ez
     if type == "B":
         Bx = acc.Bx(z)
@@ -37,7 +37,7 @@ def get_field_accelerator(
         d2Bzdz2 = misc.derivative(acc.dBzdz, z, dx=dz, n=1)
         B_freq, B_phase = acc.B_freq(z) * 1e9, acc.B_phase(z)
         Gz = acc.Gz(z)
-        Bz = (Bz - (d2Bzdz2 + Bz*(2 * np.pi * B_freq)**2/const.c**2) * r_corr * r_corr / 4) * np.cos(2 * np.pi * B_freq * t + B_phase)
+        Bz = (Bz - d2Bzdz2 * r_corr * r_corr / 4) * np.cos(2 * np.pi * B_freq * t + B_phase)
         Bx = (Bx - dBzdz * x_corr / 2 + Bz * offset_xp) * np.cos(2 * np.pi * B_freq * t + B_phase) + Gz * y_corr
         By = (By - dBzdz * y_corr / 2 + Bz * offset_yp) * np.cos(2 * np.pi * B_freq * t + B_phase) + Gz * x_corr
         return Bx, By, Bz
