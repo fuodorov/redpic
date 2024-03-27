@@ -44,9 +44,9 @@ class Element:
             Offset of the element along the y-axis, [m]
         yp: float, optional
             Element rotation in the z-y plane, [rad]
-        frequency: float, optional
-            Frequency of the element, [GHz]
-        phase: float, optional
+        w: float, optional
+            Cirular frequency of the element, [rad/s]
+        phi: float, optional
             Phase of the element, [rad]
         """
         self.z0 = z0
@@ -103,7 +103,7 @@ def read_fields(beamline: dict, z: np.arange) -> interpolate.interp1d:
                 field_files[element.file_name] = np.loadtxt(element.file_name)
             M = field_files[element.file_name]
             z_data = M[:, 0] + element.z0
-            F_data = M[:, 1] / max(M[:, 1])
+            F_data = M[:, 1]
             dz = (z_data[-1] - z_data[0]) / len(z_data)
 
             f = interpolate.interp1d(
@@ -179,7 +179,7 @@ def read_offsets(beamline: dict, z: np.arange) -> interpolate.interp1d:
                 field_files[element.file_name] = np.loadtxt(element.file_name)
             M = field_files[element.file_name]
             z_data = M[:, 0] + element.z0
-            F_data = M[:, 1] / max(M[:, 1])
+            F_data = M[:, 1]
 
             if not element.length == 0:
                 z_data = np.linspace(element.z_start, element.z_stop, len(z_data))
@@ -237,7 +237,7 @@ def read_frequency_and_phase(beamline: dict, z: np.arange) -> (interpolate.inter
                 field_files[element.file_name] = np.loadtxt(element.file_name)
             M = field_files[element.file_name]
             z_data = M[:, 0] + element.z0
-            F_data = M[:, 1] / max(M[:, 1])
+            F_data = M[:, 1]
 
             if not element.length == 0:
                 z_data = np.linspace(element.z_start, element.z_stop, len(z_data))
