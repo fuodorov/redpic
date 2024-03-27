@@ -99,7 +99,7 @@ def read_fields(beamline: dict, z: np.arange) -> interpolate.interp1d:
         F_int = F
     else:
         for element in beamline.values():
-            if not (element.file_name in field_files):  # pylint: disable=superfluous-parens
+            if not (element.file_name in field_files):
                 field_files[element.file_name] = np.loadtxt(element.file_name)
             M = field_files[element.file_name]
             z_data = M[:, 0] + element.z0
@@ -175,7 +175,7 @@ def read_offsets(beamline: dict, z: np.arange) -> interpolate.interp1d:
         offset_correct_xp, offset_correct_yp = F, F
     else:
         for element in beamline.values():
-            if not (element.file_name in field_files):  # pylint: disable=superfluous-parens
+            if not (element.file_name in field_files):
                 field_files[element.file_name] = np.loadtxt(element.file_name)
             M = field_files[element.file_name]
             z_data = M[:, 0] + element.z0
@@ -233,7 +233,7 @@ def read_frequency_and_phase(beamline: dict, z: np.arange) -> (interpolate.inter
         frequency, phase = F, F
     else:
         for element in beamline.values():
-            if not (element.file_name in field_files):  # pylint: disable=superfluous-parens
+            if not (element.file_name in field_files):
                 field_files[element.file_name] = np.loadtxt(element.file_name)
             M = field_files[element.file_name]
             z_data = M[:, 0] + element.z0
