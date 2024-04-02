@@ -5,11 +5,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Microwave grouper &#8212; redpic 0.10.6 documentation</title>
+    <title>Microwave grouper &#8212; redpic 0.10.7 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=4f649999" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=039e1c02" />
     <link rel="stylesheet" type="text/css" href="../../../_static/nbsphinx-code-cells.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=95b282e3"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=31ca06fa"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -59,7 +59,7 @@ relativistic factors of particles, equation can be rewritten as</p>
 <div class="math notranslate nohighlight">
 \[\frac{d\varphi}{dz} = \frac{\omega}{\beta c}.\]</div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[78]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
@@ -72,8 +72,9 @@ omega = 2 * np.pi * 1e9  # Angular frequency (for example, 1 GHz)
 f = 1.5 * 1e9  # Frequency
 phi_0 = 0  # Initial phase
 E0 = -40e6  # Electric field strength in V/m (example value)
-dz = 1e-6  # Step size in m
-z_max = 0.3  # Length of the buncher in m
+dz = 1e-5  # Step size in m
+z_max = 0.9  # Length of the buncher in m
+z_max_grouper = 0.3  # Length of the buncher in m
 num_particles = 1_000  # Number of particles
 
 # Initial conditions
@@ -81,14 +82,14 @@ betas = np.full(num_particles, 0.7)  # Initial beta for all particles
 phis = np.linspace(0, np.pi, num_particles)  # Uniform distribution of initial phases
 
 # Function to calculate derivatives
-def derivatives(beta, phi):
-    dbeta_dz = (E0 / U0) * np.cos(phi + phi_0) * ((1 - beta**2)**(3/2)) / beta
+def derivatives(beta, phi, E):
+    dbeta_dz = (E / U0) * np.cos(phi + phi_0) * ((1 - beta**2)**(3/2)) / beta
     dphi_dz = omega / (beta * c)
     return dbeta_dz, dphi_dz
 
 # Function to calculate Ez(z)
 def E_z(z):
-    return E0 * np.sin(2 * np.pi * f * z / c + phi_0)
+    return np.where(z &lt; z_max_grouper, E0 * np.sin(2 * np.pi * f * z / c + phi_0), 0)
 
 # Solving the system using Euler&#39;s method
 z_values = np.arange(0, z_max, dz)
@@ -96,7 +97,7 @@ betas_values = []
 phis_values = []
 
 for z in z_values:
-    dbeta_dz, dphi_dz = derivatives(betas, phis)
+    dbeta_dz, dphi_dz = derivatives(betas, phis, E_z(z))
     betas += dbeta_dz * dz
     phis += dphi_dz * dz
     betas_values.append(betas.copy())
@@ -132,8 +133,8 @@ plt.show()
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-D:\TMP\ipykernel_8688\2113458680.py:21: RuntimeWarning: invalid value encountered in power
-  dbeta_dz = (E0 / U0) * np.cos(phi + phi_0) * ((1 - beta**2)**(3/2)) / beta
+D:\TMP\ipykernel_8688\75803242.py:22: RuntimeWarning: invalid value encountered in power
+  dbeta_dz = (E / U0) * np.cos(phi + phi_0) * ((1 - beta**2)**(3/2)) / beta
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
