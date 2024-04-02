@@ -24,10 +24,11 @@ You can then see the section :doc:`install/installation` and
 .. toctree::
   :maxdepth: 1
 
+  theory/theory
   install/installation
   tutorial/tutorial
   test/test
-  perfomance/perfomance
+  performance/performance
 
 Contributing to REDPIC
 ----------------------

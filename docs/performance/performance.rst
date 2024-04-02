@@ -1,9 +1,9 @@
-Perfomance
+Performance
 ======================================================
 
-Perfomance REDPIC test.
+Performance REDPIC test.
 
 .. toctree::
   :maxdepth: 2
 
-  notebooks/perfomance.ipynb
+  notebooks/performance.ipynb
