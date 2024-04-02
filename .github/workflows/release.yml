@@ -36,6 +36,7 @@ jobs:
       - name: Compile LaTeX document
         uses: xu-cheng/latex-action@v3
         with:
+          texlive_version: 2023
           root_file: main.tex
           working_directory: manual/
 
