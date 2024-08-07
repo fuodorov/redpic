@@ -5,7 +5,6 @@ flake8>=6.1.0
 isort>=5.12.0
 jupyter>=1.0.0
 pylint>=2.17.5
-setuptools>=65.5.1
 twine>=4.0.2
 wheel>=0.41.2
 pytest>=7.4.0

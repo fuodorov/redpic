@@ -4,3 +4,4 @@ numpy>=1.26.0
 pandas>=2.0.3
 periodictable>=1.6.1
 scipy>=1.11.2
+setuptools>=65.5.1
