@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 
 from redpic.accelerator import Accelerator
 from redpic.beam.base import BaseBeam
@@ -8,8 +9,8 @@ module_logger = logging.getLogger(__name__)
 
 
 class BaseSimulation(ABC):
-    def __init__(self, beam: BaseBeam, accelerator: Accelerator):
-        self.beam = beam
+    def __init__(self, beam: BaseBeam | Iterable[BaseBeam], accelerator: Accelerator):
+        self.beams = beam if isinstance(beam, Iterable) else [beam]
         self.acc = accelerator
         self.result = {}
 

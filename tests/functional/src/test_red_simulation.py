@@ -63,6 +63,21 @@ def test_red_simulation_vs_astra(test_beam, test_accelerator):
     assert stats.ks_2samp(redpic_df["y"], astra_df["y"]).pvalue > 0.01
 
 
+def test_red_simulation_with_multiple_beams_vs_astra(test_beam, test_accelerator):
+    redpic_sim = REDSimulation([test_beam, test_beam], test_accelerator)
+    redpic_sim.track()
+    redpic_df = redpic_sim.result[list(redpic_sim.result.keys())[-1]]
+    astra_df = read_track_astra_particles("tests/functional/test_data/data/astra/track.data")
+
+    redpic_df = redpic_df[test_accelerator.z_start < redpic_df["z"]]
+    redpic_df = redpic_df[redpic_df["z"] < test_accelerator.z_stop]
+    astra_df = astra_df[test_accelerator.z_start < astra_df["z"]]
+    astra_df = astra_df[astra_df["z"] < test_accelerator.z_stop]
+
+    assert stats.ks_2samp(redpic_df["x"], astra_df["x"]).pvalue > 0.01
+    assert stats.ks_2samp(redpic_df["y"], astra_df["y"]).pvalue > 0.01
+
+
 def test_cuda_red_simulation_vs_astra(test_beam, test_accelerator):
     if numba.cuda.is_available():
         cfg.ENABLE_CUDA = True

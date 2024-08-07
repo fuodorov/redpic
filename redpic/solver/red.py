@@ -157,22 +157,23 @@ class REDSimulation(BaseSimulation):
             z[i] += vz
 
     def _track(self, *, n_files: int = 20) -> None:
-        # Init parameterss
-        Y = np.transpose(self.beam.df.to_numpy())
-        Y[2] = Y[2] + self.acc.z_start - max(Y[2])  # set initial beam position
-
+        # Init parameters
         z_start = self.acc.z_start
         z_stop = self.acc.z_stop
         dz = self.acc.dz
         dt = dz / const.c
         t_max = (z_stop - z_start) / const.c
 
-        m = self.beam.type.mass
-        q = self.beam.type.charge
+        Y = np.transpose(np.concatenate([beam.df.to_numpy() for beam in self.beams]))
+        Y[2] = Y[2] + z_start - max(Y[2])  # set initial beam position
+
+        m = np.transpose(np.concatenate([np.full(beam.n, beam.type.mass) for beam in self.beams]))
+        phys_q = np.transpose(np.concatenate([np.full(beam.n, beam.type.charge) for beam in self.beams]))
+        macro_q = np.transpose(np.concatenate([np.full(beam.n, beam.total_charge / beam.n) for beam in self.beams]))
 
         P0 = m * const.c * const.c / (const.e * 1e6)
-        E0 = m * const.c / (q * dt * 1e6)
-        B0 = m / (q * dt)
+        E0 = m * const.c / (phys_q * dt * 1e6)
+        B0 = m / (phys_q * dt)
 
         # RED
         for t in np.arange(0, t_max, 2 * dt):
@@ -185,16 +186,16 @@ class REDSimulation(BaseSimulation):
             Ex, Ey, Ez = Ex / E0, Ey / E0, Ez / E0
 
             # get electric field from beam
-            if self.beam.total_charge:
-                ex, ey, ez = get_field_beam(self.beam, self.acc, "E", Y[0] * dz, Y[1] * dz, Y[2] * dz)
+            if bool(beam.total_charge for beam in self.beams):
+                ex, ey, ez = get_field_beam(macro_q, self.acc, "E", Y[0] * dz, Y[1] * dz, Y[2] * dz)
                 ex, ey, ez = ex / E0, ey / E0, ez / E0
                 Ex, Ey, Ez = Ex + ex, Ey + ey, Ez + ez
 
             # first step RED
             if cfg.ENABLE_CUDA:
-                self._first_step_red_cuda[self.beam.n // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK](
-                    Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz
-                )
+                self._first_step_red_cuda[
+                    min(beam.n for beam in self.beams) // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK
+                ](Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz)
             else:
                 self._first_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Ex, Ey, Ez, z_start / dz, z_stop / dz)
             gamma = np.sqrt(1 + Y[3] * Y[3] + Y[4] * Y[4] + Y[5] * Y[5])
@@ -205,16 +206,16 @@ class REDSimulation(BaseSimulation):
             Bx, By, Bz = Bx / B0 / gamma, By / B0 / gamma, Bz / B0 / gamma
 
             # get magnetic field from beam
-            if self.beam.total_charge:
-                bx, by, bz = get_field_beam(self.beam, self.acc, "B", Y[0] * dz, Y[1] * dz, Y[2] * dz)
+            if bool(beam.total_charge for beam in self.beams):
+                bx, by, bz = get_field_beam(macro_q, self.acc, "B", Y[0] * dz, Y[1] * dz, Y[2] * dz)
                 bx, by, bz = bx * vz / B0, by * vz / B0, bz * vz / B0
                 Bx, By, Bz = Bx + bx, By + by, Bz + bz
 
             # second step RED
             if cfg.ENABLE_CUDA:
-                self._second_step_red_cuda[self.beam.n // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK](
-                    Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz
-                )
+                self._second_step_red_cuda[
+                    min(beam.n for beam in self.beams) // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK
+                ](Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz)
             else:
                 self._second_step_red(Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, z_start / dz, z_stop / dz)
             gamma = np.sqrt(1 + Y[3] * Y[3] + Y[4] * Y[4] + Y[5] * Y[5])
@@ -231,8 +232,10 @@ class REDSimulation(BaseSimulation):
                 self.result.update(
                     {
                         round(meters, 3): pd.DataFrame(
-                            np.transpose(np.vstack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, Ex, Ey, Ez))),
-                            columns=["x", "y", "z", "px", "py", "pz", "Bx", "By", "Bz", "Ex", "Ey", "Ez"],
+                            np.transpose(
+                                np.vstack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, Ex, Ey, Ez, macro_q))
+                            ),
+                            columns=["x", "y", "z", "px", "py", "pz", "Bx", "By", "Bz", "Ex", "Ey", "Ez", "charge"],
                         )
                     }
                 )

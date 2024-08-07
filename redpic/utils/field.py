@@ -4,7 +4,6 @@ from scipy import misc
 
 from redpic import constants as const
 from redpic.accelerator import Accelerator
-from redpic.beam.base import BaseBeam
 from redpic.core import config as cfg
 from redpic.utils.jit import jit
 
@@ -71,13 +70,13 @@ def sum_field_particles_cuda(
 
 
 def get_field_beam(
-    beam: BaseBeam, acc: Accelerator, type: str, x: np.array, y: np.array, z: np.array
+    q: np.array, acc: Accelerator, type: str, x: np.array, y: np.array, z: np.array
 ) -> (np.array, np.array, np.array):
-    q = beam.total_charge / beam.n
-    Fx, Fy, Fz = np.zeros(beam.n), np.zeros(beam.n), np.zeros(beam.n)
+    n = len(q)
+    Fx, Fy, Fz = np.zeros(n), np.zeros(n), np.zeros(n)
 
     if cfg.ENABLE_CUDA:
-        sum_field_particles_cuda[beam.n // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK](
+        sum_field_particles_cuda[n // cfg.CUDA_THREADS_PER_BLOCK + 1, cfg.CUDA_THREADS_PER_BLOCK](
             x, y, z, acc.z_start, acc.z_stop, Fx, Fy, Fz
         )
     else:
