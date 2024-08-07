@@ -1,7 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
 
-import kenv as kv
 import numpy as np
 import pandas as pd
 
@@ -18,7 +17,7 @@ class BeamDistributionType:
     ASTRA = "astra"
 
 
-class BaseBeam(ABC, kv.Beam):
+class BaseBeam(ABC):
     distribution: BeamDistributionType = BeamDistributionType.NONE
 
     def __init__(
@@ -43,23 +42,82 @@ class BaseBeam(ABC, kv.Beam):
         xp: float = 0.0e0,
         yp: float = 0.0e0,
     ):
-        super().__init__(
-            current=current,
-            energy=energy,
-            radius=radius,
-            radius_x=radius_x,
-            radius_y=radius_y,
-            rp=rp,
-            radius_xp=radius_xp,
-            radius_yp=radius_yp,
-            normalized_emittance=normalized_emittance,
-            normalized_emittance_x=normalized_emittance_x,
-            normalized_emittance_y=normalized_emittance_y,
-            x=x,
-            y=y,
-            xp=xp,
-            yp=yp,
-        )
+        """
+        Initialization of an electron beam.
+
+        Parameters
+        ----------
+        current: float
+            Beam current, [A]
+        energy: float
+            Beam energy, [MeV]
+        radius: float
+            Beam radius, [m]
+        radius_x: float, optional
+            Elliptical beam radius along the x-axis, [m]
+        radius_y: float, optional
+            Elliptical beam radius along the y-axis, [m]
+        rp: float
+            Beam radius prime, [rad]
+        radius_xp: float, optional
+            Elliptical beam radius prime along the x-axis, [rad]
+        radius_yp: float, optional
+            Elliptical beam radius prime along the y-axis, [rad]
+        normalized_emittance: float
+            Beam normalized emittance, [m*rad]
+        normalized_emittance_x: float, optional
+            Elliptical beam normalized emittance along the x-axis, [m*rad]
+        normalized_emittance_y: float, optional
+            Elliptical beam normalized emittance along the y-axis, [m*rad]
+
+        x: float, optional
+            Offset of the centroid along the x-axis, [m]
+        xp: float, optional
+            Centroid rotation in the z-x plane, [rad]
+        y: float, optional
+            Offset of the centroid along the y-axis, [m]
+        yp: float, optional
+            Centroid rotation in the z-y plane, [rad]
+        larmor_angle: float, optional
+            Centroid larmor angle, [rad]
+        charge: int, optional
+            Particle charge (dev!)
+        """
+        self.current = current
+        self.energy = energy
+        self.radius = radius
+        self.rp = rp
+        self.radius_x = radius_x
+        self.radius_y = radius_y
+        self.radius_xp = radius_xp
+        self.radius_yp = radius_yp
+        self.normalized_emittance = normalized_emittance
+        self.normalized_emittance_x = normalized_emittance_x
+        self.normalized_emittance_y = normalized_emittance_y
+        if radius != 0.0e0:
+            self.radius_x = radius
+            self.radius_y = radius
+        if rp != 0.0e0:
+            self.radius_xp = rp
+            self.radius_yp = rp
+        if normalized_emittance != 0.0e0:
+            self.normalized_emittance_x = normalized_emittance
+            self.normalized_emittance_y = normalized_emittance
+
+        self.x = x
+        self.y = y
+        self.xp = xp
+        self.yp = yp
+
+        self.gamma = gamma = self.energy / const.electron_mass_energy + 1
+        self.beta = beta = np.sqrt(1 - 1 / (gamma * gamma))
+
+        self.p = self.momentum = gamma * beta * const.electron_mass_energy
+        self.px = self.p * self.radius_xp
+        self.py = self.p * self.radius_yp
+        self.pz = self.p
+        self.description = ""
+
         self.type = type  # particles type
         self.n = 0.0  # quantity
         self.df = pd.DataFrame  # data frame
