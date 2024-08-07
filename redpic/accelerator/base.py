@@ -118,8 +118,8 @@ def read_fields(beamline: dict, z: np.arange) -> interpolate.interp1d:
             F_prime = F_prime + f_prime(z)
 
             if not element.max_field == 0:
-                int_f = integrate.cumtrapz(f(z_data), z_data)[-1]
-                int_ff = integrate.cumtrapz(f(z_data) ** 2, z_data)[-1]
+                int_f = integrate.cumulative_trapezoid(f(z_data), z_data)[-1]
+                int_ff = integrate.cumulative_trapezoid(f(z_data) ** 2, z_data)[-1]
                 element.length = int_f**2 / int_ff
                 element.field = int_ff / int_f
                 element.z_start = element.z0 - element.length
@@ -131,7 +131,7 @@ def read_fields(beamline: dict, z: np.arange) -> interpolate.interp1d:
                 element.z_stop = element.z0
 
     F = interpolate.interp1d(z, F, kind="cubic", fill_value=(0, 0), bounds_error=False)
-    F_int = integrate.cumtrapz(F(z), z)
+    F_int = integrate.cumulative_trapezoid(F(z), z)
     F_prime = interpolate.interp1d(z, F_prime, kind="cubic", fill_value=(0, 0), bounds_error=False)
     F_int = interpolate.interp1d(z[1:], F_int, kind="cubic", fill_value=(F_int[0], F_int[-1]), bounds_error=False)
 
