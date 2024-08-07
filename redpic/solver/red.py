@@ -158,7 +158,7 @@ class REDSimulation(BaseSimulation):
 
     def _track(self, *, n_files: int = cfg.DEFAULT_TRACK_SAVE_N_FILES) -> None:
         # Init parameters
-        z_start, z_stop, dz = self.acc.z_start, self.acc.z_stop, self.acc.dz
+        z_start, z_stop, dz = self.z_start, self.z_stop, self.dz
         t_start, t_stop, dt = self.t_start, self.t_stop, self.dt
 
         Y = np.transpose(np.concatenate([beam.df.to_numpy() for beam in self.beams]))
@@ -224,11 +224,11 @@ class REDSimulation(BaseSimulation):
             Bx, By, Bz = Bx * gamma * B0, By * gamma * B0, Bz * gamma * B0
             Ex, Ey, Ez = Ex * E0, Ey * E0, Ez * E0
 
-            progress, meters = t / t_stop * 100, z_start + t * const.c
+            progress = t / t_stop * 100
             if progress % (100 // n_files) < 2 * dt / t_stop * 100:
                 self.result.update(
                     {
-                        round(meters, 3): pd.DataFrame(
+                        round(progress, 3): pd.DataFrame(
                             np.transpose(
                                 np.vstack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, Ex, Ey, Ez, macro_q))
                             ),
@@ -236,4 +236,4 @@ class REDSimulation(BaseSimulation):
                         )
                     }
                 )
-            print("\rz = %.2f m (%.1f %%) " % (meters, progress), end="")
+            print("\r%.1f %% " % progress, end="")

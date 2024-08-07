@@ -18,6 +18,9 @@ class BaseSimulation(ABC):
         t_start: float = 0.0e0,
         t_stop: float = 0.0e0,
         dt: float = 0.0e0,
+        z_start: float = 0.0e0,
+        z_stop: float = 0.0e0,
+        dz: float = 0.0e0,
     ):
         self.beams = beam if isinstance(beam, Iterable) else [beam]
         self.acc = accelerator
@@ -25,6 +28,9 @@ class BaseSimulation(ABC):
         self.t_start = t_start
         self.t_stop = t_stop if t_stop else (self.acc.z_stop - self.acc.z_start) / const.c
         self.dt = dt if dt else self.acc.dz / const.c
+        self.z_start = z_start if z_start else self.acc.z_start
+        self.z_stop = z_stop if z_stop else self.acc.z_stop
+        self.dz = dz if dz else const.c * self.dt
 
     @abstractmethod
     def _track(self, *, n_files: int) -> None:
