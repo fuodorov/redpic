@@ -1,7 +1,6 @@
 from collections import namedtuple
 
 import numpy as np
-import periodictable
 from scipy import constants as scipy_constants
 
 __all__ = [
@@ -64,7 +63,3 @@ positron = Element(name="positron", symbol="e+", mass=m_e, charge=e)
 proton = Element(name="proton", symbol="p", mass=m_p, charge=e)
 antiproton = Element(name="antiproton", symbol="p-", mass=m_p, charge=-e)
 Particle = Element
-
-# Get mass of each element from periodictable
-elements = periodictable.core.default_table()
-__all__ += periodictable.core.define_elements(elements, globals())
