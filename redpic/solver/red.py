@@ -158,7 +158,7 @@ class REDSimulation(BaseSimulation):
 
     def _track(self, *, n_files: int = 20) -> None:
         # Init parameterss
-        Y = self.beam.da
+        Y = np.transpose(self.beam.df.to_numpy())
         Y[2] = Y[2] + self.acc.z_start - max(Y[2])  # set initial beam position
 
         z_start = self.acc.z_start
@@ -226,11 +226,14 @@ class REDSimulation(BaseSimulation):
             Bx, By, Bz = Bx * gamma * B0, By * gamma * B0, Bz * gamma * B0
             Ex, Ey, Ez = Ex * E0, Ey * E0, Ez * E0
 
-            progress = t / t_max * 100
-            meters = z_start + t * const.c
-            X = np.row_stack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, Ex, Ey, Ez))
-            Xt = np.transpose(X)
-            df = pd.DataFrame(Xt, columns=["x", "y", "z", "px", "py", "pz", "Bx", "By", "Bz", "Ex", "Ey", "Ez"])
+            progress, meters = t / t_max * 100, z_start + t * const.c
             if progress % (100 // n_files) < 2 * dt / t_max * 100:
-                self.result.update({round(meters, 3): df})
+                self.result.update(
+                    {
+                        round(meters, 3): pd.DataFrame(
+                            np.transpose(np.vstack((Y[0], Y[1], Y[2], Y[3], Y[4], Y[5], Bx, By, Bz, Ex, Ey, Ez))),
+                            columns=["x", "y", "z", "px", "py", "pz", "Bx", "By", "Bz", "Ex", "Ey", "Ez"],
+                        )
+                    }
+                )
             print("\rz = %.2f m (%.1f %%) " % (meters, progress), end="")

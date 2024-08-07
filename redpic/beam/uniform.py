@@ -32,5 +32,6 @@ class UniformBeam(BaseBeam):
         z = np.random.uniform(-self.radius_z + self.z, self.radius_z + self.z, int(self.n))
         pz = np.random.uniform((1 - dpz) * self.pz, (1 + dpz) * self.pz, int(self.n))
 
-        self.da = np.row_stack((x, y, z, px, py, pz))
-        self.df = pd.DataFrame(np.transpose(self.da), columns=["x", "y", "z", "px", "py", "pz"])
+        self.df = pd.DataFrame(
+            np.transpose(np.vstack((x, y, z, px, py, pz))), columns=["x", "y", "z", "px", "py", "pz"]
+        )

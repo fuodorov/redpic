@@ -16,7 +16,7 @@ def read_beam_astra_particles(file_name):
         "id",
         "flag",
     ]  # m    m    m    eV/c  eV/c  eV/c  ns       nC
-    df = pd.read_csv(file_name, header=None, delim_whitespace=True, names=cols, dtype="float32")
+    df = pd.read_csv(file_name, header=None, sep=r"\s+", names=cols, dtype="float32")
     df = df[df.flag != -15]  # ignore the lost particles
     df["px"] = df["px"] / 1e6  # MeV/c
     df["py"] = df["py"] / 1e6  # MeV/c
@@ -31,7 +31,7 @@ def read_beam_astra_particles(file_name):
 
 def read_track_astra_particles(file_name):
     cols = ["x", "y", "z", "px", "py", "pz", "clock", "charge", "id", "flag"]
-    df = pd.read_csv(file_name, header=None, delim_whitespace=True, names=cols, dtype="float32")
+    df = pd.read_csv(file_name, header=None, sep=r"\s+", names=cols, dtype="float32")
     df = df[df.flag != -15]  # ignore the lost particles
     df["px"] = df["px"] / 1e6  # MeV/c
     df["py"] = df["py"] / 1e6  # MeV/c

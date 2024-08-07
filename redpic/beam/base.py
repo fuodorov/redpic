@@ -78,10 +78,6 @@ class BaseBeam(ABC):
             Offset of the centroid along the y-axis, [m]
         yp: float, optional
             Centroid rotation in the z-y plane, [rad]
-        larmor_angle: float, optional
-            Centroid larmor angle, [rad]
-        charge: int, optional
-            Particle charge (dev!)
         """
         self.current = current
         self.energy = energy
@@ -121,7 +117,6 @@ class BaseBeam(ABC):
         self.type = type  # particles type
         self.n = 0.0  # quantity
         self.df = pd.DataFrame  # data frame
-        self.da = np.array
         self.radius_z = radius_z
         self.z = z
         self.total_charge = (
