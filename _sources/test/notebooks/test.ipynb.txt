@@ -1973,7 +1973,7 @@
     "def read_track_astra(fname):\n",
     "    cols = ['x', 'y', 'z', 'px', 'py', 'pz', 'clock', 'charge', 'id', 'flag']\n",
     "    #        m    m    m    eV/c  eV/c  eV/c  ns       nC\n",
-    "    df = pd.read_csv(fname, header=None, delim_whitespace=True, names=cols, dtype='float32')\n",
+    "    df = pd.read_csv(fname, header=None, sep=r"\s+", names=cols, dtype='float32')\n",
     "    \n",
     "    df = df[df.flag !=-15] # ignore the lost particles\n",
     "    \n",
