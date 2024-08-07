@@ -19,8 +19,6 @@ class Element:
         xp: float = 0.0,
         y: float = 0.0,
         yp: float = 0.0,
-        frequency: float = 0.0,
-        phase: float = 0.0,
     ):
         """
         Initialization of an accelerator element.
@@ -44,10 +42,6 @@ class Element:
             Offset of the element along the y-axis, [m]
         yp: float, optional
             Element rotation in the z-y plane, [rad]
-        w: float, optional
-            Cirular frequency of the element, [rad/s]
-        phi: float, optional
-            Phase of the element, [rad]
         """
         self.z0 = z0
         self.max_field = max_field
@@ -57,8 +51,6 @@ class Element:
         self.xp = xp
         self.y = y
         self.yp = yp
-        self.frequency = frequency
-        self.phase = phase
 
         self.z_start = 0.0e0
         self.z_stop = 0.0e0
@@ -220,51 +212,6 @@ def read_offsets(beamline: dict, z: np.arange) -> interpolate.interp1d:
     return (offset_correct_x, offset_correct_xp, offset_correct_y, offset_correct_yp)
 
 
-def read_frequency_and_phase(beamline: dict, z: np.arange) -> (interpolate.interp1d, interpolate.interp1d):
-    field_files = {}
-    F = 0
-    frequency, phase = 0, 0
-
-    if not beamline:
-        z_data = [i / len(z) for i in range(len(z))]
-        F_data = [0 for i in range(len(z))]
-        f = interpolate.interp1d(z_data, F_data, fill_value=(0, 0), bounds_error=False)
-        F = F + f(z)
-        frequency, phase = F, F
-    else:
-        for element in beamline.values():
-            if not (element.file_name in field_files):  # pylint: disable=superfluous-parens
-                field_files[element.file_name] = np.loadtxt(element.file_name)
-            M = field_files[element.file_name]
-            z_data = M[:, 0] + element.z0
-            F_data = M[:, 1]
-
-            if not element.length == 0:
-                z_data = np.linspace(element.z_start, element.z_stop, len(z_data))
-                f_frequency = interpolate.interp1d(
-                    z_data,
-                    [element.frequency for i in range(len(z_data))],
-                    fill_value=(0, 0),
-                    bounds_error=False,
-                )
-                f_phase = interpolate.interp1d(
-                    z_data,
-                    [element.phase for i in range(len(z_data))],
-                    fill_value=(0, 0),
-                    bounds_error=False,
-                )
-            else:
-                f = interpolate.interp1d(z_data, 0 * F_data, kind="cubic", fill_value=(0, 0), bounds_error=False)
-                f_frequency, f_phase = f, f
-
-            frequency = frequency + f_frequency(z)
-            phase = phase + f_phase(z)
-
-    frequency = interpolate.interp1d(z, frequency, kind="linear", fill_value=(0, 0), bounds_error=False)
-    phase = interpolate.interp1d(z, phase, kind="linear", fill_value=(0, 0), bounds_error=False)
-    return (frequency, phase)
-
-
 class Accelerator:
     """
     Top-level accelerator class that contains all the accelerator data.
@@ -312,8 +259,6 @@ class Accelerator:
         self.Gzdz = interpolate.interp1d
         self.Dx, self.Dxp = interpolate.interp1d, interpolate.interp1d
         self.Dy, self.Dyp = interpolate.interp1d, interpolate.interp1d
-        self.B_freq, self.B_phase = interpolate.interp1d, interpolate.interp1d
-        self.E_freq, self.E_phase = interpolate.interp1d, interpolate.interp1d
 
     def add_solenoid(
         self,
@@ -326,8 +271,6 @@ class Accelerator:
         xp: float = 0.0,
         y: float = 0.0,
         yp: float = 0.0,
-        frequency: float = 0.0,
-        phase: float = 0.0,
     ) -> None:
         """
         Creates a solenoid lenses in the accelerator.
@@ -351,15 +294,8 @@ class Accelerator:
             Offset of the element along the y-axis
         yp: float, optional
             Element rotation in the z-y plane
-
-        frequency: float, optional
-            Frequency of the element, [Hz]
-        phase: float, optional
-            Phase of the element, [rad]
         """
-        self.Bz_beamline[name] = Element(
-            center, max_field, file_name, name, x=x, xp=xp, y=y, yp=yp, frequency=frequency, phase=phase
-        )
+        self.Bz_beamline[name] = Element(center, max_field, file_name, name, x=x, xp=xp, y=y, yp=yp)
 
     def add_accel(
         self,
@@ -372,8 +308,6 @@ class Accelerator:
         xp: float = 0.0,
         y: float = 0.0,
         yp: float = 0.0,
-        frequency: float = 0.0,
-        phase: float = 0.0,
     ) -> None:
         """
         Creates an accelerating module in the accelerator.
@@ -397,15 +331,8 @@ class Accelerator:
             Offset of the element along the y-axis
         yp: float, optional
             Element rotation in the z-y plane
-
-        frequency: float, optional
-            Frequency of the element, [Hz]
-        phase: float, optional
-            Phase of the element, [rad]
         """
-        self.Ez_beamline[name] = Element(
-            center, max_field, file_name, name, x=x, xp=xp, y=y, yp=yp, frequency=frequency, phase=phase
-        )
+        self.Ez_beamline[name] = Element(center, max_field, file_name, name, x=x, xp=xp, y=y, yp=yp)
 
     def add_quadrupole(self, name: str, center: float, max_field: float, file_name: str) -> None:
         """
@@ -585,9 +512,6 @@ class Accelerator:
         self.Dyp = interpolate.interp1d(
             self.z, Dyp_Bz(self.z) + Dyp_Ez(self.z), kind="linear", fill_value=(0, 0), bounds_error=False
         )
-
-        self.B_freq, self.B_phase = read_frequency_and_phase(self.Bz_beamline, self.parameter)
-        self.E_freq, self.E_phase = read_frequency_and_phase(self.Ez_beamline, self.parameter)
 
     def __str__(self):
         string = "Accelerator structure.\n"
