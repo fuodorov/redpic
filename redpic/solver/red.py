@@ -156,7 +156,7 @@ class REDSimulation(BaseSimulation):
             vz = pz[i] / gamma
             z[i] += vz
 
-    def _track(self, *, n_files: int = 20) -> None:
+    def _track(self, *, n_files: int = cfg.DEFAULT_TRACK_SAVE_N_FILES) -> None:
         # Init parameters
         z_start = self.acc.z_start
         z_stop = self.acc.z_stop
@@ -171,8 +171,8 @@ class REDSimulation(BaseSimulation):
         phys_q = np.transpose(np.concatenate([np.full(beam.n, beam.type.charge) for beam in self.beams]))
         macro_q = np.transpose(np.concatenate([np.full(beam.n, beam.total_charge / beam.n) for beam in self.beams]))
 
-        P0 = m * const.c * const.c / (const.e * 1e6)
-        E0 = m * const.c / (phys_q * dt * 1e6)
+        P0 = m * const.c * const.c / (const.e * const.mega)
+        E0 = m * const.c / (phys_q * dt * const.mega)
         B0 = m / (phys_q * dt)
 
         # RED

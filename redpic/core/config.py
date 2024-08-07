@@ -6,7 +6,7 @@ logging_config.dictConfig(LOGGING)
 
 NAME = "redpic"
 
-VERSION = "0.11.3"
+VERSION = "0.11.4"
 
 AUTHOR = "Vyacheslav Fedorov"
 
@@ -31,3 +31,5 @@ DISABLE_NOGIL = False
 ENABLE_CUDA = False
 
 CUDA_THREADS_PER_BLOCK = 1024
+
+DEFAULT_TRACK_SAVE_N_FILES = 20

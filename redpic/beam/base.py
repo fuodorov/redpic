@@ -144,15 +144,15 @@ class BaseBeam(ABC):
             Energy\t{self.energy} MeV
             Total momentum\t{self.momentum} MeV/c
             Rel. factor\t{self.gamma}
-            Radius x\t{self.radius_x * 1e3} mm
-            Radius y\t{self.radius_y * 1e3} mm
+            Radius x\t{self.radius_x / const.milli} mm
+            Radius y\t{self.radius_y / const.milli} mm
             Radius z\t{self.radius_z} m
-            Radius x prime\t{self.radius_xp * 1e3} mrad
-            Radius y prime\t{self.radius_yp * 1e3} mrad
-            Horizontal centroid position\t{self.x * 1e3} mm
-            Vertical centroid position\t{self.y * 1e3} mm
-            Horizontal centroid angle\t{self.xp * 1e3} mrad
-            Vertical centroid angle\t{self.yp * 1e3} mrad
-            Normalized emittance x\t{self.normalized_emittance_x * 1e6} mm*mrad
-            Normalized emittance y\t{self.normalized_emittance_y * 1e6} mm*mrad
+            Radius x prime\t{self.radius_xp / const.milli} mrad
+            Radius y prime\t{self.radius_yp / const.milli} mrad
+            Horizontal centroid position\t{self.x / const.milli} mm
+            Vertical centroid position\t{self.y / const.milli} mm
+            Horizontal centroid angle\t{self.xp / const.milli} mrad
+            Vertical centroid angle\t{self.yp / const.milli} mrad
+            Normalized emittance x\t{self.normalized_emittance_x / const.milli / const.milli} mm*mrad
+            Normalized emittance y\t{self.normalized_emittance_y / const.milli / const.milli} mm*mrad
         """

@@ -34,6 +34,8 @@ __all__ = [
     "antiproton",
     "Element",
     "Particle",
+    "milli",
+    "mega",
 ]
 
 # Constants
@@ -63,3 +65,6 @@ positron = Element(name="positron", symbol="e+", mass=m_e, charge=e)
 proton = Element(name="proton", symbol="p", mass=m_p, charge=e)
 antiproton = Element(name="antiproton", symbol="p-", mass=m_p, charge=-e)
 Particle = Element
+
+milli = scipy_constants.milli
+mega = scipy_constants.mega
