@@ -161,8 +161,10 @@ class REDSimulation(BaseSimulation):
         z_start = self.acc.z_start
         z_stop = self.acc.z_stop
         dz = self.acc.dz
-        dt = dz / const.c
-        t_max = (z_stop - z_start) / const.c
+
+        min_beta = min(beam.beta for beam in self.beams)
+        dt = dz / min_beta / const.c
+        t_max = (z_stop - z_start) / min_beta / const.c
 
         Y = np.transpose(np.concatenate([beam.df.to_numpy() for beam in self.beams]))
         Y[2] = Y[2] + z_start - max(Y[2])  # set initial beam position
