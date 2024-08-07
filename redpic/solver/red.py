@@ -158,13 +158,8 @@ class REDSimulation(BaseSimulation):
 
     def _track(self, *, n_files: int = cfg.DEFAULT_TRACK_SAVE_N_FILES) -> None:
         # Init parameters
-        z_start = self.acc.z_start
-        z_stop = self.acc.z_stop
-        dz = self.acc.dz
-
-        min_beta = min(beam.beta for beam in self.beams)
-        dt = dz / min_beta / const.c
-        t_max = (z_stop - z_start) / min_beta / const.c
+        z_start, z_stop, dz = self.acc.z_start, self.acc.z_stop, self.acc.dz
+        t_start, t_stop, dt = self.t_start, self.t_stop, self.dt
 
         Y = np.transpose(np.concatenate([beam.df.to_numpy() for beam in self.beams]))
         Y[2] = Y[2] + z_start - max(Y[2])  # set initial beam position
@@ -178,7 +173,7 @@ class REDSimulation(BaseSimulation):
         B0 = m / (phys_q * dt)
 
         # RED
-        for t in np.arange(0, t_max, 2 * dt):
+        for t in np.arange(t_start, t_stop, 2 * dt):
             # into the internal system
             Y[0], Y[1], Y[2] = Y[0] / dz, Y[1] / dz, Y[2] / dz
             Y[3], Y[4], Y[5] = Y[3] / P0, Y[4] / P0, Y[5] / P0
@@ -229,8 +224,8 @@ class REDSimulation(BaseSimulation):
             Bx, By, Bz = Bx * gamma * B0, By * gamma * B0, Bz * gamma * B0
             Ex, Ey, Ez = Ex * E0, Ey * E0, Ez * E0
 
-            progress, meters = t / t_max * 100, z_start + t * const.c
-            if progress % (100 // n_files) < 2 * dt / t_max * 100:
+            progress, meters = t / t_stop * 100, z_start + t * const.c
+            if progress % (100 // n_files) < 2 * dt / t_stop * 100:
                 self.result.update(
                     {
                         round(meters, 3): pd.DataFrame(
